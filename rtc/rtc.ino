@@ -1,32 +1,33 @@
 #include <Wire.h>
 
 
-int RTCDATA[16];  //read buf. from RTC unit
+int RTCDATA[16];  //リード用のbuff
 
 #define RTCaddress 0xa2 >> 1
-//TWI address of RTC-unit
+//RTC8564のスレーブアドレスは『0xA2』固定だが、Wireライブラリでは7ビットでデバイス特定をするため、右に1ビットシフトさせて指定
 
 #define inPin 8
-//set digital8 as input
+//inPinの指定
 
 
 void setup() {
 
-  pinMode(inPin, INPUT);
-  digitalWrite(inPin, HIGH);   //pull up
+  pinMode(inPin, INPUT); //8ピンの初期化
+  digitalWrite(inPin, HIGH);   //指定したピンがINPUTに設定されている場合は、HIGHを出力すると20KΩの内部プルアップ抵抗が有効
 
 
-  Serial.begin(9600);
+  Serial.begin(9600); //siralの速度
 
   Serial.println("initializing RTC unit");
-  //init message
+  //メッセージ
 
-  delay(1000);
+  delay(1000);//処理を遅らせる
 
-  Wire.begin();  // join the TWI as bus-master
+  Wire.begin();  // arudinoをマスターとして接続
 
   Wire.beginTransmission(RTCaddress);
-  //write to RTC address (write mode)
+  //接続するIC2のモジュールを選択
+  
   Wire.write(0x00);
   //set internal register address
   // of RTC as 0 (auto increment)
