@@ -35,8 +35,8 @@ void setup() {
   // as 2008.12.25  12:20:15
   Wire.write(0x00);
   //control1 = 0x00
-  Wire.write(0x03);
-  //control2 = 0x03
+  Wire.write(0x02);
+  //control2 = 0x02
   Wire.write(0x15);
   //seconds = 0x15
   Wire.write(0x20);
