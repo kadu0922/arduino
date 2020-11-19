@@ -1,0 +1,4 @@
+sendln "b"
+sendln "3"
+sendln "c"
+sendln "10"
