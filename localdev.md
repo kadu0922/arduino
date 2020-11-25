@@ -8,6 +8,15 @@
 
 この階層でvscodeを開く
 
+arduino IDE をインストール(windows storeじゃなくて配布されてるやつ)
+https://www.arduino.cc/en/software
+
+vscodeの拡張機能でarduinoをダウンロード
+
+拡張機能の設定から
+C:\Program Files (x86)\Arduino
+のパスを通す
+
 ②c_cpp_properties.jsonの設定
 "USER_PATH": を自身のものに設定
 
