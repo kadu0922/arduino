@@ -1,5 +1,9 @@
 ## 使い方
 ①vscodeの階層
+
+
+
+
 ![image](https://user-images.githubusercontent.com/58362633/100183144-94189f80-2f21-11eb-829a-b9a547e7d408.png)
 この階層でvscodeを開く
 
