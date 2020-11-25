@@ -1,0 +1,9 @@
+{
+    "C_Cpp.intelliSenseEngine": "Tag Parser",
+    "terminal.integrated.shellArgs.windows": [
+      "-NoExit",
+      "chcp",
+      "65001"
+      ],
+      "arduino.logLevel": "info"
+}

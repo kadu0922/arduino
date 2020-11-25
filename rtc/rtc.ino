@@ -1,32 +1,32 @@
 #include <Wire.h>
 
 
-int RTCDATA[16];  //ãƒªãƒ¼ãƒ‰ç”¨ã®buff
+int RTCDATA[16];  //ƒŠ[ƒh—p‚Ìbuff
 
 #define RTCaddress 0xa2 >> 1
-//RTC8564ã®ã‚¹ãƒ¬ãƒ¼ãƒ–ã‚¢ãƒ‰ãƒ¬ã‚¹ã¯ã€0xA2ã€å›ºå®šã ãŒã€Wireãƒ©ã‚¤ãƒ–ãƒ©ãƒªã§ã¯7ãƒ“ãƒƒãƒˆã§ãƒ‡ãƒã‚¤ã‚¹ç‰¹å®šã‚’ã™ã‚‹ãŸã‚ã€å³ã«1ãƒ“ãƒƒãƒˆã‚·ãƒ•ãƒˆã•ã›ã¦æŒ‡å®š
+//RTC8564‚ÌƒXƒŒ[ƒuƒAƒhƒŒƒX‚Íw0xA2xŒÅ’è‚¾‚ªAWireƒ‰ƒCƒuƒ‰ƒŠ‚Å‚Í7ƒrƒbƒg‚ÅƒfƒoƒCƒX“Á’è‚ğ‚·‚é‚½‚ßA‰E‚É1ƒrƒbƒgƒVƒtƒg‚³‚¹‚Äw’è
 
 #define inPin 8
-//inPinã®æŒ‡å®š
+//inPin‚Ìw’è
 
 
 void setup() {
 
-  pinMode(inPin, INPUT); //8ãƒ”ãƒ³ã®åˆæœŸåŒ–
-  digitalWrite(inPin, HIGH);   //æŒ‡å®šã—ãŸãƒ”ãƒ³ãŒINPUTã«è¨­å®šã•ã‚Œã¦ã„ã‚‹å ´åˆã¯ã€HIGHã‚’å‡ºåŠ›ã™ã‚‹ã¨20KÎ©ã®å†…éƒ¨ãƒ—ãƒ«ã‚¢ãƒƒãƒ—æŠµæŠ—ãŒæœ‰åŠ¹
+  pinMode(inPin, INPUT); //8ƒsƒ“‚Ì‰Šú‰»
+  digitalWrite(inPin, HIGH);   //w’è‚µ‚½ƒsƒ“‚ªINPUT‚Éİ’è‚³‚ê‚Ä‚¢‚éê‡‚ÍAHIGH‚ğo—Í‚·‚é‚Æ20Kƒ¶‚Ì“à•”ƒvƒ‹ƒAƒbƒv’ïR‚ª—LŒø
 
 
-  Serial.begin(9600); //siralã®é€Ÿåº¦
+  Serial.begin(9600); //siral‚Ì‘¬“x
 
   Serial.println("initializing RTC unit");
-  //ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸
+  //ƒƒbƒZ[ƒW
 
-  delay(1000);//å‡¦ç†ã‚’é…ã‚‰ã›ã‚‹
+  delay(1000);//ˆ—‚ğ’x‚ç‚¹‚é
 
-  Wire.begin();  // arudinoã‚’ãƒã‚¹ã‚¿ãƒ¼ã¨ã—ã¦æ¥ç¶š
+  Wire.begin();  // arudino‚ğƒ}ƒXƒ^[‚Æ‚µ‚ÄÚ‘±
 
   Wire.beginTransmission(RTCaddress);
-  //æ¥ç¶šã™ã‚‹IC2ã®ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚’é¸æŠ
+  //Ú‘±‚·‚éIC2‚Ìƒ‚ƒWƒ…[ƒ‹‚ğ‘I‘ğ
   
   Wire.write(0x00);
   //set internal register address
