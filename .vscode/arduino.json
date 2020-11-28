@@ -1,5 +1,5 @@
 {
     "board": "arduino:avr:uno",
     "port": "COM7",
-    "sketch": "myrtc/myrtc.ino"
+    "sketch": "rtc_interrupt_2\\rtc_interrput_2.ino"
 }
