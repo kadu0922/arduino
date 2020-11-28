@@ -22,8 +22,8 @@ void setup()
 
   Wire.beginTransmission(RTCaddress); //接続するIC2のモジュールを選択
   Wire.write(0x00);                   // データを転送するレジスタ番号を指定
-  Wire.write(0b00100000);                   // 00 Control 1　STOP(bit5)-1 をセットし動作を停止させる。
-  Wire.write(0x00010001);                   // 01 Control 2 定周期タイマ割り込み設定（パルス出力のため5bit目を1）TIEを１に設定
+  Wire.write(0b00100000);                   // 00 Control 1　STOP = 1 動作停止
+  Wire.write(0x00);                         // 01 Control 2 
   Wire.write(0b00000001);                   // 02 Seconds　
   Wire.write(0b00000000);                   // 03 Minutes
   Wire.write(0b00000000);                   // 04 Hours
@@ -31,23 +31,22 @@ void setup()
   Wire.write(0b00000001);                   // 06 Weekdays
   Wire.write(0b00000001);                   // 07 Months
   Wire.write(0b00100000);                   // 08 Years
-                                            //20年1月１日00:00に設定
+  //20年1月１日00:00に設定
 
-  Wire.write(0x00); // 09 Minutes Alarm　
-  Wire.write(0x00); // 0A Hours Alarm
-  Wire.write(0x00); // 0B Days Alarm
-  Wire.write(0x00); // 0C Weekdays Alarm
+  //Alram レジスタ
+  Wire.write(0x00);       // 09 Minutes Alarm　
+  Wire.write(0x00);       // 0A Hours Alarm
+  Wire.write(0x00);       // 0B Days Alarm
+  Wire.write(0x00);       // 0C Weekdays Alarm
 
-  Wire.write(0x00); // 0D CLKOUT 　　　　タイマー用レジスタ
-  Wire.write(0x00); // 0E Timer control　　　　　〃
-  Wire.write(0b00000101); // 0F Timer　　　　　　　　　〃
-  Wire.write(0x00); // 00 Control 1　STOP(bit5)-0 をリセットし動作を開始する。
-                    //    アドレス 0F の次は先頭アドレスの 00 に戻る。
-  Wire.endTransmission();
+  //timerレジスタ
+  Wire.write(0x00);       // 0D CLKOUT
+  Wire.write(0b10000010); // 0E TimerControl
+  Wire.write(0b00000101); // 0F Timer
 
-  Wire.beginTransmission(RTCaddress); //接続するIC2のモジュールを選択
-  Wire.write(0x0E);                         // データを転送する先頭のレジスタ番号を指定
-  Wire.write(0b10000010);                   // 0E Timer control(1Hz = 1秒)
+  // Control 設定
+  Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
+  Wire.write(0b00010001); //Control 2 Ti/Tp = 1 TIE = 1
   Wire.endTransmission();
 }
 
