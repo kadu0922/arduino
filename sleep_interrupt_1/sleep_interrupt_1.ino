@@ -1,13 +1,13 @@
 #include <avr/sleep.h>
-#define inPin 5
+#define inPin 2
 #define LED 13
 void setup() {
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);  //スリープモード設定
 
   pinMode(LED, OUTPUT);//13を出力設定(LED用)
-  pinMode(inPin, INPUT_PULLUP);//5番をプルアップ設定
+  pinMode(inPin, INPUT_PULLUP);//2番をプルアップ設定
   
-  attachInterrupt(digitalPinToInterrupt(2), func_int, FALLING);//割り込み処理
+  attachInterrupt(0, func_int, FALLING);//割り込み処理
 }
 
 void loop() {
