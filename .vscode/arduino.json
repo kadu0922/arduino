@@ -1,5 +1,6 @@
+
 {
-    "board": "arduino:avr:uno",
-    "port": "COM7",
-    "sketch": "rtc_interrupt_2\\rtc_interrput_2.ino"
-}
+  "board": "arduino:avr:uno",
+  "port": "COM4",
+  "sketch": "sleep_interrupt_1\\sleep_interrupt_1.ino"
+} 
