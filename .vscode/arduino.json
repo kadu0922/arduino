@@ -1,5 +1,4 @@
 {
     "board": "arduino:avr:uno",
-    "port": "COM4",
-    "sketch": "sleep_interrupt_1\\sleep_interrupt_1.ino"
+
 }
