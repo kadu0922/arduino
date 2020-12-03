@@ -1,52 +1,59 @@
-void setup(){
+void setup()
+{
     Serial.begin(9600); //シリアル通信の速度
+    deley(3000);
+    LoraInit();
 }
 
-void loop(){
-    Serial.println("1");      //configmode
+void loop()
+{
+}
 
-    Serial.println("a");      //ノード種別
-    Serial.println("2");      /*  1. Coordinator 2. EndDevice */
+void LoraInit()
+{
+    Serial.println("1"); //configmode
 
-    Serial.println("b");      //帯域幅
-    Serial.println("5");      /*  3. 62.5kHz
+    Serial.println("a"); //ノード種別
+    Serial.println("2"); /*  1. Coordinator 2. EndDevice */
+
+    Serial.println("b"); //帯域幅
+    Serial.println("5"); /*  3. 62.5kHz
                                 4. 125kHz
                                 5. 250kHz
                                 6. 500kHz */
 
-    Serial.println("c");      //拡散率
-    Serial.println("12");     //拡散率:12
+    Serial.println("c");  //拡散率
+    Serial.println("12"); //拡散率:12
 
-    Serial.println("d");      //チャンネル
-    Serial.println("1");      //チャンネル:1
+    Serial.println("d"); //チャンネル
+    Serial.println("1"); //チャンネル:1
 
-    Serial.println("e");      //PanId
-    Serial.println("0002");   //PanId:0002
+    Serial.println("e");    //PanId
+    Serial.println("0002"); //PanId:0002
 
-    Serial.println("f");      //OwnId
+    Serial.println("f"); //OwnId
     Serial.println("0012");
 
-    Serial.println("g");      //DestId
+    Serial.println("g"); //DestId
     Serial.println("1012");
 
-    Serial.println("l");      //Ack
-    Serial.println("2");      /* 1. ON 2. OFF*/
-    
-    Serial.println("p");      //Rssi
-    Serial.println("1");      /* 1. ON 2. OFF*/
+    Serial.println("l"); //Ack
+    Serial.println("2"); /* 1. ON 2. OFF*/
 
-    Serial.println("B");     //sendtime
-    Serial.println("5");     //X秒
-    
-    Serial.println("C");     //senddata
-    Serial.println("1234567890");    
+    Serial.println("p"); //Rssi
+    Serial.println("1"); /* 1. ON 2. OFF*/
 
-    Serial.println("w");      //save
+    Serial.println("B"); //sendtime
+    Serial.println("5"); //X秒
 
-    Serial.println("z");      //start
+    Serial.println("C"); //senddata
+    Serial.println("1234567890");
+
+    Serial.println("w"); //save
+
+    Serial.println("z"); //start
     Serial.print("finish!!!\n");
 }
-
 /*
  a. node        select Coordinator or EndDevice
  b. bw          select Band Width
