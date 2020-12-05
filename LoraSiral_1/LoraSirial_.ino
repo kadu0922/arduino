@@ -1,6 +1,8 @@
+#include <ES920LR.h>
+
 void setup()
 {
-    Serial.begin(9600); //シリアル通信の速度
+    Lora SerialInit(9600);
     deley(3000);
     LoraInit();
 }
@@ -11,47 +13,38 @@ void loop()
 
 void LoraInit()
 {
-    Serial.println("1"); //configmode
+    Lora.LoraSend("1"); //configmode
 
-    Serial.println("a"); //ノード種別
-    Serial.println("2"); /*  1. Coordinator 2. EndDevice */
+    Lora.LoraSend("a", "2"); //ノード種別
+                             /*  1. Coordinator 2. EndDevice */
 
-    Serial.println("b"); //帯域幅
-    Serial.println("5"); /*  3. 62.5kHz
+    Lora.LoraSend("b", "5"); //帯域幅
+                             /*  3. 62.5kHz
                                 4. 125kHz
                                 5. 250kHz
                                 6. 500kHz */
 
-    Serial.println("c");  //拡散率
-    Serial.println("12"); //拡散率:12
+    Lora.LoraSend("c", "12"); //拡散率:12
 
-    Serial.println("d"); //チャンネル
-    Serial.println("1"); //チャンネル:1
+    Lora.LoraSend("d", "1"); //チャンネル:1
 
-    Serial.println("e");    //PanId
-    Serial.println("0002"); //PanId:0002
+    Lora.LoraSend("e", "0002"); //PanId:0002
 
-    Serial.println("f"); //OwnId
-    Serial.println("0012");
+    Lora.LoraSend("f", "0012"); //OwnId:0012
 
-    Serial.println("g"); //DestId
-    Serial.println("1012");
+    Lora.LoraSend("g", "1012"); //DestId:1012
 
-    Serial.println("l"); //Ack
-    Serial.println("2"); /* 1. ON 2. OFF*/
+    Lora.LoraSend("l", "2"); // Ack: 1. ON 2. OFF
 
-    Serial.println("p"); //Rssi
-    Serial.println("1"); /* 1. ON 2. OFF*/
+    Lora.LoraSend("p", "1"); // RSSi: 1. ON 2. OFF
 
-    Serial.println("B"); //sendtime
-    Serial.println("5"); //X秒
+    Lora.LoraSend("b", "5"); //sendtime:X秒
 
-    Serial.println("C"); //senddata
-    Serial.println("1234567890");
+    Lora.LoraSend("c", "1234567890"); //senddata
 
-    Serial.println("w"); //save
+    Lora.LoraSend("w"); //save
 
-    Serial.println("z"); //start
+    Lora.LoraSend("z"); //start
     Serial.print("finish!!!\n");
 }
 /*
