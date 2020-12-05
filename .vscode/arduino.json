@@ -1,5 +1,0 @@
-{
-    "board": "arduino:avr:uno",
-    "port": "COM4",
-    "sketch": "LoraSiral_1\\LoraSirial_.ino"
-}
