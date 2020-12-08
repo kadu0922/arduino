@@ -7,9 +7,11 @@ Class Lora
 public:
     void LoraSend(char config, char message);
     void SerialInit(int BautRate);
+    void LoraRead();
 
 private:
     char config;
     char message;
+    int BautRate;
 }
 #endif
