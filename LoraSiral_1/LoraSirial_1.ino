@@ -1,77 +1,88 @@
-#include <ES920LR.h>
+#include <SoftwareSerial.h>
 
-void setup()
-{
-    Lora SerialInit(9600);
-    deley(3000);
-    LoraInit();
+#define RST_PIN 13
+#define LORA_RX 2
+#define LORA_TX 3
+
+const int setCmdDelay = 100; /*待機時間*/
+
+SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
+
+void setup() {
+  pinMode(RST_PIN, OUTPUT);
+ // LoRaを再起動させる
+  digitalWrite(RST_PIN, LOW);
+  delay(100);
+  digitalWrite(RST_PIN, HIGH); 
+  delay(1500);
+
+  Serial.begin(115200);
+  LoraSerial.begin(115200);
+  loraInit();
+  
 }
 
-void loop()
-{
+void loop() {
 }
 
-void LoraInit()
-{
-    Lora.LoraSend("1"); //configmode
-
-    Lora.LoraSend("a", "2"); //ノード種別
-                             /*  1. Coordinator 2. EndDevice */
-
-    Lora.LoraSend("b", "5"); //帯域幅
-                             /*  3. 62.5kHz
-                                4. 125kHz
-                                5. 250kHz
-                                6. 500kHz */
-
-    Lora.LoraSend("c", "12"); //拡散率:12
-
-    Lora.LoraSend("d", "1"); //チャンネル:1
-
-    Lora.LoraSend("e", "0002"); //PanId:0002
-
-    Lora.LoraSend("f", "0012"); //OwnId:0012
-
-    Lora.LoraSend("g", "1012"); //DestId:1012
-
-    Lora.LoraSend("l", "2"); // Ack: 1. ON 2. OFF
-
-    Lora.LoraSend("p", "1"); // RSSi: 1. ON 2. OFF
-
-    Lora.LoraSend("b", "5"); //sendtime:X秒
-
-    Lora.LoraSend("c", "1234567890"); //senddata
-
-    Lora.LoraSend("w"); //save
-
-    Lora.LoraSend("z"); //start
-    Serial.print("finish!!!\n");
+void loraInit() {
+  Serial.print("Start...");
+  // コマンドモード開始
+  LoraSerial.println("2"); clearBuffer();
+  // bw（帯域幅の設定）
+  LoraSerial.println("bw 5"); clearBuffer();
+  // sf（拡散率の設定）
+  LoraSerial.println("sf 12"); clearBuffer();
+  LoraSerial.println("channel 1"); clearBuffer();
+  // 自分が参加するPANネットワークアドレスの設定
+  LoraSerial.println("panid 0002"); clearBuffer();
+  // 自分のノードIDを設定
+  LoraSerial.println("ownid 0012"); clearBuffer();
+  // ack受信の設定
+  LoraSerial.println("ack 2"); clearBuffer();
+  //送信元のID付与設定
+  LoraSerial.println("o 1"); clearBuffer();
+  // RRSIの付与設定
+  LoraSerial.println("p 1"); clearBuffer();
+  // 送信モードを設定
+  LoraSerial.println("n 2"); clearBuffer();
+  // 設定を保存する
+  LoraSerial.println("w"); clearBuffer();
+  // 通信の開始
+  LoraSerial.println("z"); clearBuffer();
+  Serial.println("Set up OK!");
 }
-/*
- a. node        select Coordinator or EndDevice
- b. bw          select Band Width
- c. sf          set Spreading Factor
- d. channel     set channel
- e. panid       set PAN ID
- f. ownid       set Own Node ID
- g. dstid       set Destination ID
- l. ack         set Acknowledge Mode
- m. retry       set send retry count
- n. transmode   select Transfer Mode
- o. rcvid       set received Node ID information
- p. rssi        set RSSI information
- q. operation   select Configuration or Operation
- r. baudrate    select UART baudrate
- s. sleep       select Sleep Mode
- t. sleeptime   set Sleep Wakeup Timer value
- u. power       set Output Power
- v. version     software version
- w. save        save parameters
- x. load        load default parameters
- y. show        show parameters
- z. start       Transite Operation
- A. format      set Data Format
- B. sendtime    set test send interval
- C. senddata    set test send data
- ?. help        help
-*/
+
+void clearBuffer() {
+  delay(setCmdDelay);
+  while (LoraSerial.available() > 0) LoraSerial.read();
+}
+
+// /*
+//  a. node        select Coordinator or EndDevice
+//  b. bw          select Band Width
+//  c. sf          set Spreading Factor
+//  d. channel     set channel
+//  e. panid       set PAN ID
+//  f. ownid       set Own Node ID
+//  g. dstid       set Destination ID
+//  l. ack         set Acknowledge Mode
+//  m. retry       set send retry count
+//  n. transmode   select Transfer Mode
+//  o. rcvid       set received Node ID information
+//  p. rssi        set RSSI information
+//  q. operation   select Configuration or Operation
+//  r. baudrate    select UART baudrate
+//  s. sleep       select Sleep Mode
+//  t. sleeptime   set Sleep Wakeup Timer value
+//  u. power       set Output Power
+//  v. version     software version
+//  w. save        save parameters
+//  x. load        load default parameters
+//  y. show        show parameters
+//  z. start       Transite Operation
+//  A. format      set Data Format
+//  B. sendtime    set test send interval
+//  C. senddata    set test send data
+//  ?. help        help
+// */
