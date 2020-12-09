@@ -29,7 +29,7 @@ void loraInit() {
     // コマンドモード開始
     LoraSerial.println("2"); clearBuffer();
     //nodeの種別設定
-    LoraSerial.println("node 2")
+    LoraSerial.println("node 2");
     // bw（帯域幅の設定）
     LoraSerial.println("bw 5"); clearBuffer();
     // sf（拡散率の設定）
@@ -43,6 +43,8 @@ void loraInit() {
     LoraSerial.println("dstid 1012"); clearBuffer();
     // ack受信の設定
     LoraSerial.println("ack 2"); clearBuffer();
+    // 転送モード設定
+    LoraSerial.println("n 1"); clearBuffer();
     // RRSIの付与設定
     LoraSerial.println("p 1"); clearBuffer();
     // UART転送速度設定
