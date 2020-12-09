@@ -6,9 +6,18 @@ close #
 これと、評価ボードのピンアサインが対応してる
 
 ## memo
+arduino | Lora or RTC
+-- | --
+hoge | hoge
+hoge | hoge
+hoge | hoge
+hoge | hoge
+hoge | hoge
+hoge | hoge
+hoge | hoge
 
 ### 送信側
-設定内容 | hoge
+設定内容 | 内容
 -- | --
 ノード種別設定 | hoge
 帯域幅 | hoge
@@ -25,7 +34,7 @@ UART   転送速度 | hoge
 自動送信データ設定 | hoge
 
 ### 受信側
-設定内容 | hogehoge
+設定内容 | 内容
 -- | --
 ノード種別設定 | hoge
 帯域幅 | hoge
