@@ -3,7 +3,7 @@
 #define RST_PIN 13
 #define LORA_RX 2
 #define LORA_TX 3
-#define BUFFER_SIZE 30
+#define BUFFER_SIZE 5000
 
 const int setCmdDelay = 100; /*待機時間*/
 
@@ -21,12 +21,14 @@ void setup() {
   LoraSerial.begin(115200);
   loraInit();
   delay(1500);
-  Serial.begin("----------\n");
-  Serial.begin("Read Start\n");
-  Serial.begin("----------\n");
+
+  Serial.println("Read Start\n");
+  Serial.println("----------\n");
 }
 
 void loop() {
+  Serial.print("----------\n");
+  LoraRead();
 }
 
 void loraInit() {
@@ -34,7 +36,9 @@ void loraInit() {
     // コマンドモード開始
     LoraSerial.println("2"); clearBuffer();
     //nodeの種別設定
-    LoraSerial.println("node 2")
+    LoraSerial.println("node 2");
+    //トランスモードをpayloadにする
+    LoraSerial.println("n 1");
     // bw（帯域幅の設定）
     LoraSerial.println("bw 5"); clearBuffer();
     // sf（拡散率の設定）
@@ -52,15 +56,12 @@ void loraInit() {
     LoraSerial.println("p 1"); clearBuffer();
     // UART転送速度設定
     LoraSerial.println("r 5"); clearBuffer();
-    // 自動送信間隔
-    LoraSerial.println("B 5"); clearBuffer();
-    // 自動送信データ設定
-    LoraSerial.println("C 1234567890"); clearBuffer();
     // 設定を保存する
     LoraSerial.println("w"); clearBuffer();
     // 通信の開始
     LoraSerial.println("z"); clearBuffer();
     Serial.println("Set up OK!");
+
 }
 
 void clearBuffer() {
@@ -70,24 +71,32 @@ void clearBuffer() {
 
 void LoraRead(){
     int n = 0;      //添字
-    char Data[BUFFER_SIZE];
-    while(LoraSerial.available > 0){
+    char Data[BUFFER_SIZE] = "";
+    
+    if(LoraSerial.read() == -1){
+          Serial.println("Nothing Data");
+          delay(3000);
+    }else{
+      while(LoraSerial.available() > 0){
         Data[n] = LoraSerial.read();        //Dataを読み込む
-        
-        // 改行文字が来たら終端文字を挿入し、シリアルモニターで表示する
-        if (Data[n] == '\r' || Data[n] == '\n')
+      
+      // 改行文字が来たら終端文字を挿入し、シリアルモニターで表示する
+      if (Data[n] == '\r' || Data[n] == '\n')
         {
-            Data[n] = '\0';
-            clearBuffer();
-            Serial.println(Data);
-            break;
+          Data[n] = '\0';
+          clearBuffer();
+          Serial.println(Data);
+          delay(3000);
+          break;
         }
+      
+      
+      if (n < BUFFER_SIZE)//buffsizeを超えたら0に戻す
+          n++;
+      else
+          n = 0;
 
-        if (n < BUFFER_SIZE)//buffsizeを超えたら0に戻す
-            n++;
-        else
-            n = 0;
-
-        delay(300);
+      delay(300);
     }
+  }
 }
