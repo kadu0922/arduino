@@ -16,8 +16,8 @@ void setup() {
     digitalWrite(RST_PIN, HIGH); 
     delay(1500);
 
-    Serial.begin(115200);
-    LoraSerial.begin(115200);
+    Serial.begin(9600);
+    LoraSerial.begin(9600);
     loraInit();
 }
 

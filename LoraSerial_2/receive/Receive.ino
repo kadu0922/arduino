@@ -3,7 +3,7 @@
 #define RST_PIN 13
 #define LORA_RX 2
 #define LORA_TX 3
-#define BUFFER_SIZE 5000
+#define BUFFER_SIZE 500
 
 const int setCmdDelay = 100; /*待機時間*/
 
@@ -15,10 +15,10 @@ void setup() {
   digitalWrite(RST_PIN, LOW);
   delay(100);
   digitalWrite(RST_PIN, HIGH); 
-  delay(1500);
+  delay(3500);
 
   Serial.begin(9600);
-  LoraSerial.begin(115200);
+  LoraSerial.begin(9600);
   loraInit();
   delay(1500);
 
@@ -43,6 +43,7 @@ void loraInit() {
     LoraSerial.println("bw 5"); clearBuffer();
     // sf（拡散率の設定）
     LoraSerial.println("sf 12"); clearBuffer();
+    //チャンネル1
     LoraSerial.println("channel 1"); clearBuffer();
     // 自分が参加するPANネットワークアドレスの設定
     LoraSerial.println("panid 0002"); clearBuffer();
@@ -52,10 +53,12 @@ void loraInit() {
     LoraSerial.println("dstid ffff"); clearBuffer();
     // ack受信の設定
     LoraSerial.println("ack 2"); clearBuffer();
+    // 送信元jのID設定
+    LoraSerial.println("o 1"); clearBuffer();
     // RRSIの付与設定
     LoraSerial.println("p 1"); clearBuffer();
     // UART転送速度設定
-    LoraSerial.println("r 5"); clearBuffer();
+    LoraSerial.println("r 1"); clearBuffer();
     // 設定を保存する
     LoraSerial.println("w"); clearBuffer();
     // 通信の開始
@@ -71,32 +74,18 @@ void clearBuffer() {
 
 void LoraRead(){
     int n = 0;      //添字
-    char Data[BUFFER_SIZE] = "";
-    
+    String Data;
+
     if(LoraSerial.read() == -1){
           Serial.println("Nothing Data");
-          delay(3000);
+          delay(1000);
     }else{
-      while(LoraSerial.available() > 0){
-        Data[n] = LoraSerial.read();        //Dataを読み込む
       
-      // 改行文字が来たら終端文字を挿入し、シリアルモニターで表示する
-      if (Data[n] == '\r' || Data[n] == '\n')
-        {
-          Data[n] = '\0';
-          clearBuffer();
-          Serial.println(Data);
-          delay(3000);
-          break;
-        }
+      Data = LoraSerial.readStringUntil('\r\n');//CRおよびLFのため
       
-      
-      if (n < BUFFER_SIZE)//buffsizeを超えたら0に戻す
-          n++;
-      else
-          n = 0;
-
-      delay(300);
-    }
+      clearBuffer();
+      Serial.println(Data);
+      delay(1000);
+    
   }
 }
