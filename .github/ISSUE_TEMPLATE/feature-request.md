@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 ## やること
-
+温度感を書く
 ## memo 
 ![image](https://user-images.githubusercontent.com/58362633/100498491-e669f280-31a5-11eb-98a1-fbdf65fbc549.png)
 これと、評価ボードのピンアサインが対応してる
