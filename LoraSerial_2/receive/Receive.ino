@@ -79,9 +79,8 @@ void clearBuffer() {
 }
 
 void LoraRead(){
-    int n = 0;      //添字
+  
     String Data;
-
     if(LoraSerial.read() == -1){
           Serial.println("Nothing Data");
           delay(1000);
