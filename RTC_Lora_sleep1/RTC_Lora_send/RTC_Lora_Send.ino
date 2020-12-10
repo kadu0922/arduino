@@ -2,11 +2,12 @@
 #include <avr/sleep.h>
 #include <SoftwareSerial.h>
 
-#define inPin 2
+#define INPIN 2
 #define LED 10
 #define RTCaddress 0xa2 >> 1
 //RTC8564のスレーブアドレスは『0xA2』固定だが、Wireライブラリでは7ビットでデバイス特定をするため、右に1ビットシフトさせて指定
 
+#define SLEEP_PIN 12   /*スリープピン*/
 #define RST_PIN 13      /*リセットピン*/
 #define LORA_RX 4       /*Software_RX_4*/
 #define LORA_TX 5       /*Software_TX_5*/
@@ -56,17 +57,25 @@ void setRtcConfig(){
     Wire.endTransmission();
 }
 
+void setSystemSleep(){
+    digitalWrite(SLEEP_PIN, HIGH);          //Lora sleep_mode
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);    //スリープモード設定
+}
+
 void setup()
 {
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);  //スリープモード設定
+    pinMode(Lora_SLEEP_PIN,OUTPUT);         //Loraのスリープピン初期化
+    digitalWrite(Lora_SLEEP_PIN, LOW);      //Low = active_mode　High = sleep_mode
 
     pinMode(LED, OUTPUT);                   //13を出力設定(LED用)
-    pinMode(inPin, INPUT_PULLUP);           //2番をプルアップ設定
+    pinMode(INPIN, INPUT_PULLUP);           //2番をプルアップ設定
     attachInterrupt(0, interrput, FALLING); // 外部割り込みを開始する。
                                             // message 割り込み時に実行される関数
                                             // FALLING ピンの状態が HIGH → LOW になった時に割り込み
     Serial.begin(9600);                     //siralの速度
     Serial.print("start!!\n---------------------------\n");
+
+    setSystemSleep();
     restartLora();
     loraInit();
     setRtcConfig();
@@ -77,10 +86,11 @@ void loop()
     sleep_enable();     //スリープを有効化
     sleep_cpu();        //スリープ開始(ここでプログラムは停止する)
     sleep_disable();    //スリープを無効化
+
+    digitalWrite(ES920LR_RST_PIN, LOW); //Lora Acctive_mode
     digitalWrite(LED, 1);
-
-    loraDataSend();
-
+    loraDataSend();                     //loraDatasend
+    setSystemSleep();                   //System Sleep_mode
     digitalWrite(LED, 0);
 }
 
@@ -120,6 +130,8 @@ void loraInit() {
     loraConfigSend("n 1"); 
     // RRSIの付与設定
     loraConfigSend("p 1"); 
+    // sleepの設定
+    loraConfigSend("s 3"); 
     // UART転送速度設定
     loraConfigSend("r 1"); 
     // 設定を保存する
