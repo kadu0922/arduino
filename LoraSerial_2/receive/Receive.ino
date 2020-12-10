@@ -4,6 +4,7 @@
 #define LORA_RX 2       /*Software_RX_2*/
 #define LORA_TX 3       /*Software_TX_3*/
 #define CMDDELAY 100    /*待機時間*/
+#define READTIME 1000   /*読み込み時間*/
 #define BOOTDELAY 1500  /*Boot待機時間*/
 #define BAUTRATE 9600   /*BautRate*/
 
@@ -79,17 +80,15 @@ void clearBuffer() {
 }
 
 void LoraRead(){
-  
-    String Data;
-    if(LoraSerial.read() == -1){
-          Serial.println("Nothing Data");
-          delay(1000);
-    }else{
-      Data = LoraSerial.readStringUntil('\r\n');//CRおよびLFのため
-      clearBuffer();
-      Serial.println(Data.substring(11)); //データ部分だけ表示
-      delay(1000);
+  String Data;
+  if(LoraSerial.read() == -1){
+    Serial.println("Nothing Data");
+  }else{
+    Data = LoraSerial.readStringUntil('\r\n');//CRおよびLFのため
+    clearBuffer();
+    Serial.println(Data.substring(11)); //データ部分だけ表示
   }
+  delay(READTIME);
 }
 
 // /*
