@@ -15,6 +15,7 @@
 #define BAUTRATE 9600   /*BautRate*/
 #define READTIME 1000   /*読み込み時間*/
 
+SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
 void interrput()
 {
