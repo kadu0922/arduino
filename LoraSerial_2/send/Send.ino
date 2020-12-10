@@ -1,10 +1,11 @@
 #include <SoftwareSerial.h>
 
-#define RST_PIN 13
-#define LORA_RX 2
-#define LORA_TX 3
-
-const int setCmdDelay = 100; /*待機時間*/
+#define RST_PIN 13      /*リセットピン*/
+#define LORA_RX 2       /*Software_RX_2*/
+#define LORA_TX 3       /*Software_TX_3*/
+#define CMDDELAY 100    /*CMD待機時間*/
+#define BOOTDELAY 1500  /*Boot待機時間*/
+#define BAUTRATE 9600   /*BautRate*/
 
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
@@ -12,12 +13,12 @@ void setup() {
     pinMode(RST_PIN, OUTPUT);
     // LoRaを再起動させる
     digitalWrite(RST_PIN, LOW);
-    delay(100);
+    delay(BOOTDELAY);
     digitalWrite(RST_PIN, HIGH); 
-    delay(1500);
+    delay(BOOTDELAY);
 
-    Serial.begin(9600);
-    LoraSerial.begin(9600);
+    Serial.begin(BAUTRATE);
+    LoraSerial.begin(BAUTRATE);
     loraInit();
 }
 
@@ -25,43 +26,49 @@ void loop() {
 }
 
 void loraInit() {
-    Serial.print("Start...");
+    Serial.println("Start...");
     // コマンドモード開始
-    LoraSerial.println("2"); clearBuffer();
+    loraSend("2"); 
     //nodeの種別設定
-    LoraSerial.println("node 2");
+    loraSend("node 2");
     // bw（帯域幅の設定）
-    LoraSerial.println("bw 5"); clearBuffer();
+    loraSend("bw 5"); 
     // sf（拡散率の設定）
-    LoraSerial.println("sf 12"); clearBuffer();
-    LoraSerial.println("channel 1"); clearBuffer();
+    loraSend("sf 12"); 
+    //channel設定
+    loraSend("channel 1"); 
     // 自分が参加するPANネットワークアドレスの設定
-    LoraSerial.println("panid 0002"); clearBuffer();
+    loraSend("panid 0002"); 
     // 自分のノードIDを設定
-    LoraSerial.println("ownid 0012"); clearBuffer();
+    loraSend("ownid 0012"); 
     //送信元ノードネットワークアドレス
-    LoraSerial.println("dstid 1012"); clearBuffer();
+    loraSend("dstid 1012"); 
     // ack受信の設定
-    LoraSerial.println("ack 2"); clearBuffer();
+    loraSend("ack 2"); 
     // 転送モード設定
-    LoraSerial.println("n 1"); clearBuffer();
+    loraSend("n 1"); 
     // RRSIの付与設定
-    LoraSerial.println("p 1"); clearBuffer();
+    loraSend("p 1"); 
     // UART転送速度設定
-    LoraSerial.println("r 5"); clearBuffer();
+    loraSend("r 1"); 
     // 自動送信間隔
-    LoraSerial.println("B 5"); clearBuffer();
+    loraSend("B 5"); 
     // 自動送信データ設定
-    LoraSerial.println("C 1234567890"); clearBuffer();
+    loraSend("C 1234567890"); 
     // 設定を保存する
-    LoraSerial.println("w"); clearBuffer();
+    loraSend("w");
     // 通信の開始
-    LoraSerial.println("z"); clearBuffer();
+    loraSend("z");
     Serial.println("Set up OK!");
 }
 
+void loraSend(String Config){
+    LoraSerial.println(Config);
+    clearBuffer();
+}
+
 void clearBuffer() {
-    delay(setCmdDelay);
+    delay(CMDDELAY);
     while (LoraSerial.available() > 0) LoraSerial.read();
 }
 
