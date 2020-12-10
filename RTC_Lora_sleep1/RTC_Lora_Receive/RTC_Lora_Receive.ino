@@ -162,7 +162,7 @@ void loop()
     sleep_cpu();        //スリープ開始(ここでプログラムは停止する)
     sleep_disable();    //スリープを無効化
     digitalWrite(LED, 1);
-    digitalWrite(ES920LR_RST_PIN, LOW); //Lora Acctive_mode
+    digitalWrite(SLEEP_PIN, LOW);        //Lora Acctive_mode
     digitalWrite(LED, 1);
     while (n < 5)
     {
