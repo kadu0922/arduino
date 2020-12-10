@@ -85,13 +85,10 @@ void LoraRead(){
           Serial.println("Nothing Data");
           delay(1000);
     }else{
-      
       Data = LoraSerial.readStringUntil('\r\n');//CRおよびLFのため
-      
       clearBuffer();
-      Serial.println(Data.substring(11));
+      Serial.println(Data.substring(11)); //データ部分だけ表示
       delay(1000);
-    
   }
 }
 
