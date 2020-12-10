@@ -64,8 +64,8 @@ void setSystemSleep(){
 
 void setup()
 {
-    pinMode(Lora_SLEEP_PIN,OUTPUT);         //Loraのスリープピン初期化
-    digitalWrite(Lora_SLEEP_PIN, LOW);      //Low = active_mode　High = sleep_mode
+    pinMode(SLEEP_PIN,OUTPUT);         //Loraのスリープピン初期化
+    digitalWrite(SLEEP_PIN, LOW);      //Low = active_mode　High = sleep_mode
 
     pinMode(LED, OUTPUT);                   //13を出力設定(LED用)
     pinMode(INPIN, INPUT_PULLUP);           //2番をプルアップ設定
