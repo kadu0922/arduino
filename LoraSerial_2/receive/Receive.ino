@@ -90,7 +90,7 @@ void LoraRead(){
       Data = LoraSerial.readStringUntil('\r\n');//CRおよびLFのため
       
       clearBuffer();
-      Serial.println(Data);
+      Serial.println(Data.substring(11));
       delay(1000);
     
   }
