@@ -54,7 +54,7 @@ void setRtcConfig(){
 }
 
 /* loraの初期化関数 */
-void loraInit() {
+void setLoraInit() {
     Serial.println("Start...");
     // コマンドモード開始
     loraConfigSend("2"); 
@@ -103,7 +103,7 @@ void clearBuffer() {
 }
 
 /* Loraを再起動させる関数 */
-void restartLora(){
+void setRestartLora(){
     pinMode(RST_PIN, OUTPUT);
     digitalWrite(RST_PIN, LOW);
     delay(BOOTDELAY);
@@ -128,7 +128,7 @@ void interrput()
 }
 
 /* Dataを読み出す関数*/
-void loraDataRead(){
+void readLoraData(){
     String Data;
     if(LoraSerial.read() == -1){
         Serial.println("Nothing Data");
@@ -155,8 +155,8 @@ void setup()
     Serial.print("start!!\n---------------------------\n");
 
     setSystemSleep();
-    restartLora();
-    loraInit();
+    setRestartLora();
+    setLoraInit();
     setRtcConfig();
 }
 
@@ -172,7 +172,7 @@ void loop()
     while (n < 5)
     {
         Serial.println("-----------------");
-        loraDataRead();
+        readLoraData();
         n++;
     }
 
