@@ -18,14 +18,6 @@
 
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
-/* Sleepを解除する割り込み関数 */
-void interrput()
-{
-    Serial.println("interrupt_message");
-    Serial.println("light up LED 5s");
-    Serial.println("-----------------");
-}
-
 /* RTCの設定を初期化する関数 */
 void setRtcConfig(){
     Wire.begin(); // arudinoをマスターとして接続
@@ -61,18 +53,6 @@ void setRtcConfig(){
     Wire.endTransmission();
 }
 
-/* Loraを再起動させる関数 */
-void restartLora(){
-    pinMode(RST_PIN, OUTPUT);
-    digitalWrite(RST_PIN, LOW);
-    delay(BOOTDELAY);
-    digitalWrite(RST_PIN, HIGH); 
-    delay(BOOTDELAY);
-
-    Serial.begin(BAUTRATE);
-    LoraSerial.begin(BAUTRATE);
-}
-
 /* loraの初期化関数 */
 void loraInit() {
     Serial.println("Start...");
@@ -89,27 +69,24 @@ void loraInit() {
     // 自分が参加するPANネットワークアドレスの設定
     loraConfigSend("panid 0002"); 
     // 自分のノードIDを設定
-    loraConfigSend("ownid 1012"); 
+    loraConfigSend("ownid 0012"); 
     //送信元ノードネットワークアドレス
-    loraConfigSend("dstid ffff"); 
+    loraConfigSend("dstid 1012"); 
     // ack受信の設定
     loraConfigSend("ack 2"); 
     // 転送モード設定
     loraConfigSend("n 1"); 
     // RRSIの付与設定
     loraConfigSend("p 1"); 
-    // UART転送速度設定
-    loraConfigSend("r 1"); 
     // sleepの設定
     loraConfigSend("s 3"); 
-    // 自動送信間隔
-    loraConfigSend("B 0"); 
-    // 自動送信データ設定
-    loraConfigSend("C receiveSide"); 
+    // UART転送速度設定
+    loraConfigSend("r 1"); 
     // 設定を保存する
     loraConfigSend("w");
     // 通信の開始
     loraConfigSend("z");
+    // 送信データの内容
     Serial.println("Set up OK!");
 }
 
@@ -125,6 +102,32 @@ void clearBuffer() {
     while (LoraSerial.available() > 0) LoraSerial.read();
 }
 
+/* Loraを再起動させる関数 */
+void restartLora(){
+    pinMode(RST_PIN, OUTPUT);
+    digitalWrite(RST_PIN, LOW);
+    delay(BOOTDELAY);
+    digitalWrite(RST_PIN, HIGH); 
+    delay(BOOTDELAY);
+
+    Serial.begin(BAUTRATE);
+    LoraSerial.begin(BAUTRATE);
+}
+
+/* Arduino,Loraをスリープさせる関数 */
+void setSystemSleep(){
+    digitalWrite(SLEEP_PIN, HIGH);          //Lora sleep_mode
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);    //スリープモード設定
+}
+
+/* Sleepを解除する割り込み関数 */
+void interrput()
+{
+    Serial.println("interrupt_message");
+    Serial.println("light up LED 5s");
+}
+
+/* Dataを読み出す関数*/
 void loraDataRead(){
     String Data;
     if(LoraSerial.read() == -1){
@@ -135,12 +138,6 @@ void loraDataRead(){
         Serial.println(Data.substring(11)); //データ部分だけ表示
     }
     delay(READTIME);
-}
-
-/* Arduino,Loraをスリープさせる関数 */
-void setSystemSleep(){
-    digitalWrite(SLEEP_PIN, HIGH);          //Lora sleep_mode
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);    //スリープモード設定
 }
 
 /* Main関数 */

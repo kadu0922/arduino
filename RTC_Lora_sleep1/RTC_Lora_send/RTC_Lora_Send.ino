@@ -17,13 +17,6 @@
 
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
-/* Sleepを解除する割り込み関数 */
-void interrput()
-{
-    Serial.println("interrupt_message");
-    Serial.println("light up LED 5s");
-}
-
 /* RTCの設定を初期化する関数 */
 void setRtcConfig(){
     Wire.begin(); // arudinoをマスターとして接続
@@ -57,57 +50,6 @@ void setRtcConfig(){
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
     Wire.write(0b00010001); //Control 2 Ti/Tp = 1 TIE = 1
     Wire.endTransmission();
-}
-
-/* Arduino,Loraをスリープさせる関数 */
-void setSystemSleep(){
-    digitalWrite(SLEEP_PIN, HIGH);          //Lora sleep_mode
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);    //スリープモード設定
-}
-
-/* Main関数 */
-void setup()
-{
-    pinMode(SLEEP_PIN,OUTPUT);         //Loraのスリープピン初期化
-    digitalWrite(SLEEP_PIN, LOW);      //Low = active_mode　High = sleep_mode
-
-    pinMode(LED, OUTPUT);                   //13を出力設定(LED用)
-    pinMode(INPIN, INPUT_PULLUP);           //2番をプルアップ設定
-    attachInterrupt(0, interrput, FALLING); // 外部割り込みを開始する。
-                                            // message 割り込み時に実行される関数
-                                            // FALLING ピンの状態が HIGH → LOW になった時に割り込み
-    Serial.begin(9600);                     //siralの速度
-    Serial.print("start!!\n---------------------------\n");
-
-    setSystemSleep();
-    restartLora();
-    loraInit();
-    setRtcConfig();
-}
-
-void loop()
-{
-    sleep_enable();     //スリープを有効化
-    sleep_cpu();        //スリープ開始(ここでプログラムは停止する)
-    sleep_disable();    //スリープを無効化
-
-    digitalWrite(SLEEP_PIN, LOW);         //Lora Acctive_mode
-    digitalWrite(LED, 1);
-    loraDataSend();                     //loraDatasend
-    setSystemSleep();                   //System Sleep_mode
-    digitalWrite(LED, 0);
-}
-
-/* Loraを再起動させる関数 */
-void restartLora(){
-    pinMode(RST_PIN, OUTPUT);
-    digitalWrite(RST_PIN, LOW);
-    delay(BOOTDELAY);
-    digitalWrite(RST_PIN, HIGH); 
-    delay(BOOTDELAY);
-
-    Serial.begin(BAUTRATE);
-    LoraSerial.begin(BAUTRATE);
 }
 
 /* loraの初期化関数 */
@@ -159,6 +101,31 @@ void clearBuffer() {
     while (LoraSerial.available() > 0) LoraSerial.read();
 }
 
+/* Loraを再起動させる関数 */
+void restartLora(){
+    pinMode(RST_PIN, OUTPUT);
+    digitalWrite(RST_PIN, LOW);
+    delay(BOOTDELAY);
+    digitalWrite(RST_PIN, HIGH); 
+    delay(BOOTDELAY);
+
+    Serial.begin(BAUTRATE);
+    LoraSerial.begin(BAUTRATE);
+}
+
+/* Arduino,Loraをスリープさせる関数 */
+void setSystemSleep(){
+    digitalWrite(SLEEP_PIN, HIGH);          //Lora sleep_mode
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);    //スリープモード設定
+}
+
+/* Sleepを解除する割り込み関数 */
+void interrput()
+{
+    Serial.println("interrupt_message");
+    Serial.println("light up LED 5s");
+}
+
 /* LoraからDataを送る関数 */
 void loraDataSend(){
     delay(1000);
@@ -171,4 +138,37 @@ void loraDataSend(){
     LoraSerial.println("hooooooooooooooooooooooooogedesuwaaaaaa");
     delay(1000);
     LoraSerial.println("hooooooooooooooooooooooooogedesuwaaaaaa");
+}
+
+/* Main関数 */
+void setup()
+{
+    pinMode(SLEEP_PIN,OUTPUT);         //Loraのスリープピン初期化
+    digitalWrite(SLEEP_PIN, LOW);      //Low = active_mode　High = sleep_mode
+
+    pinMode(LED, OUTPUT);                   //13を出力設定(LED用)
+    pinMode(INPIN, INPUT_PULLUP);           //2番をプルアップ設定
+    attachInterrupt(0, interrput, FALLING); // 外部割り込みを開始する。
+                                            // message 割り込み時に実行される関数
+                                            // FALLING ピンの状態が HIGH → LOW になった時に割り込み
+    Serial.begin(9600);                     //siralの速度
+    Serial.print("start!!\n---------------------------\n");
+
+    setSystemSleep();
+    restartLora();
+    loraInit();
+    setRtcConfig();
+}
+
+void loop()
+{
+    sleep_enable();     //スリープを有効化
+    sleep_cpu();        //スリープ開始(ここでプログラムは停止する)
+    sleep_disable();    //スリープを無効化
+
+    digitalWrite(SLEEP_PIN, LOW);         //Lora Acctive_mode
+    digitalWrite(LED, 1);
+    loraDataSend();                     //loraDatasend
+    setSystemSleep();                   //System Sleep_mode
+    digitalWrite(LED, 0);
 }
