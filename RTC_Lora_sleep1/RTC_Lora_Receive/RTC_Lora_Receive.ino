@@ -18,6 +18,7 @@
 
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
+/* Sleepを解除する割り込み関数 */
 void interrput()
 {
     Serial.println("interrupt_message");
@@ -25,6 +26,7 @@ void interrput()
     Serial.println("-----------------");
 }
 
+/* RTCの設定を初期化する関数 */
 void setRtcConfig(){
     Wire.begin(); // arudinoをマスターとして接続
     delay(1000);  // 発振子の動作待機
@@ -59,7 +61,7 @@ void setRtcConfig(){
     Wire.endTransmission();
 }
 
-// LoRaを再起動させる関数
+/* Loraを再起動させる関数 */
 void restartLora(){
     pinMode(RST_PIN, OUTPUT);
     digitalWrite(RST_PIN, LOW);
@@ -71,6 +73,7 @@ void restartLora(){
     LoraSerial.begin(BAUTRATE);
 }
 
+/* loraの初期化関数 */
 void loraInit() {
     Serial.println("Start...");
     // コマンドモード開始
@@ -110,11 +113,13 @@ void loraInit() {
     Serial.println("Set up OK!");
 }
 
+/* loraにConfigを送る関数 */
 void loraConfigSend(String Config){
     LoraSerial.println(Config);
     clearBuffer();
 }
 
+/* bufferを初期化する関数 */
 void clearBuffer() {
     delay(CMDDELAY);
     while (LoraSerial.available() > 0) LoraSerial.read();
@@ -132,11 +137,13 @@ void loraDataRead(){
     delay(READTIME);
 }
 
+/* Arduino,Loraをスリープさせる関数 */
 void setSystemSleep(){
     digitalWrite(SLEEP_PIN, HIGH);          //Lora sleep_mode
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);    //スリープモード設定
 }
 
+/* Main関数 */
 void setup()
 {
     pinMode(SLEEP_PIN,OUTPUT);         //Loraのスリープピン初期化

@@ -7,22 +7,24 @@
 #define RTCaddress 0xa2 >> 1
 //RTC8564のスレーブアドレスは『0xA2』固定だが、Wireライブラリでは7ビットでデバイス特定をするため、右に1ビットシフトさせて指定
 
-#define SLEEP_PIN 12   /*スリープピン*/
-#define RST_PIN 13      /*リセットピン*/
-#define LORA_RX 4       /*Software_RX_4*/
-#define LORA_TX 5       /*Software_TX_5*/
-#define CMDDELAY 100    /*CMD待機時間*/
-#define BOOTDELAY 1500  /*Boot待機時間*/
-#define BAUTRATE 9600   /*BautRate*/
+#define SLEEP_PIN 12   /* スリープピン */
+#define RST_PIN 13      /* リセットピン */
+#define LORA_RX 4       /* Software_RX_4 */
+#define LORA_TX 5       /* Software_TX_5 */
+#define CMDDELAY 100    /* CMD待機時間 */
+#define BOOTDELAY 1500  /* Boot待機時間 */
+#define BAUTRATE 9600   /* BautRate */
 
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
+/* Sleepを解除する割り込み関数 */
 void interrput()
 {
     Serial.println("interrupt_message");
     Serial.println("light up LED 5s");
 }
 
+/* RTCの設定を初期化する関数 */
 void setRtcConfig(){
     Wire.begin(); // arudinoをマスターとして接続
     delay(1000);  // 発振子の動作待機
@@ -57,11 +59,13 @@ void setRtcConfig(){
     Wire.endTransmission();
 }
 
+/* Arduino,Loraをスリープさせる関数 */
 void setSystemSleep(){
     digitalWrite(SLEEP_PIN, HIGH);          //Lora sleep_mode
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);    //スリープモード設定
 }
 
+/* Main関数 */
 void setup()
 {
     pinMode(SLEEP_PIN,OUTPUT);         //Loraのスリープピン初期化
@@ -94,7 +98,7 @@ void loop()
     digitalWrite(LED, 0);
 }
 
-// LoRaを再起動させる関数
+/* Loraを再起動させる関数 */
 void restartLora(){
     pinMode(RST_PIN, OUTPUT);
     digitalWrite(RST_PIN, LOW);
@@ -106,6 +110,7 @@ void restartLora(){
     LoraSerial.begin(BAUTRATE);
 }
 
+/* loraの初期化関数 */
 void loraInit() {
     Serial.println("Start...");
     // コマンドモード開始
@@ -142,17 +147,19 @@ void loraInit() {
     Serial.println("Set up OK!");
 }
 
+/* loraにConfigを送る関数 */
 void loraConfigSend(String Config){
     LoraSerial.println(Config);
     clearBuffer();
 }
 
+/* bufferを初期化する関数 */
 void clearBuffer() {
     delay(CMDDELAY);
     while (LoraSerial.available() > 0) LoraSerial.read();
 }
 
-//dataを送信する関数
+/* LoraからDataを送る関数 */
 void loraDataSend(){
     delay(1000);
     LoraSerial.println("hooooooooooooooooooooooooogedesuwaaaaaa");
