@@ -57,41 +57,41 @@ void setRtcConfig(){
 void setLoraInit() {
     Serial.println("Start...");
     // コマンドモード開始
-    loraConfigSend("2"); 
+    setLoraConfig("2"); 
     //nodeの種別設定
-    loraConfigSend("node 2");
+    setLoraConfig("node 2");
     // bw（帯域幅の設定）
-    loraConfigSend("bw 5"); 
+    setLoraConfig("bw 5"); 
     // sf（拡散率の設定）
-    loraConfigSend("sf 12"); 
+    setLoraConfig("sf 12"); 
     //channel設定
-    loraConfigSend("channel 1"); 
+    setLoraConfig("channel 1"); 
     // 自分が参加するPANネットワークアドレスの設定
-    loraConfigSend("panid 0002"); 
+    setLoraConfig("panid 0002"); 
     // 自分のノードIDを設定
-    loraConfigSend("ownid 0012"); 
+    setLoraConfig("ownid 1012"); 
     //送信元ノードネットワークアドレス
-    loraConfigSend("dstid 1012"); 
+    setLoraConfig("dstid ffff"); 
     // ack受信の設定
-    loraConfigSend("ack 2"); 
+    setLoraConfig("ack 2"); 
     // 転送モード設定
-    loraConfigSend("n 1"); 
+    setLoraConfig("n 1"); 
     // RRSIの付与設定
-    loraConfigSend("p 1"); 
+    setLoraConfig("p 1"); 
     // sleepの設定
-    loraConfigSend("s 3"); 
+    setLoraConfig("s 3"); 
     // UART転送速度設定
-    loraConfigSend("r 1"); 
+    setLoraConfig("r 1"); 
     // 設定を保存する
-    loraConfigSend("w");
+    setLoraConfig("w");
     // 通信の開始
-    loraConfigSend("z");
+    setLoraConfig("z");
     // 送信データの内容
     Serial.println("Set up OK!");
 }
 
 /* loraにConfigを送る関数 */
-void loraConfigSend(String Config){
+void setLoraConfig(String Config){
     LoraSerial.println(Config);
     clearBuffer();
 }
