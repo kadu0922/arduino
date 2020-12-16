@@ -7,12 +7,15 @@
 #define RTCaddress 0xa2 >> 1
 //RTC8564のスレーブアドレスは『0xA2』固定だが、Wireライブラリでは7ビットでデバイス特定をするため、右に1ビットシフトさせて指定
 
-#define SLEEP_PIN 12   /* スリープピン */
+#define MAXTIME 5       /* sleep時間を合わせる定義*/
+#define SLEEP_PIN 12    /* スリープピン */
 #define RST_PIN 13      /* リセットピン */
 #define LORA_RX 4       /* Software_RX_4 */
 #define LORA_TX 5       /* Software_TX_5 */
 #define CMDDELAY 100    /* CMD待機時間 */
 #define BOOTDELAY 1500  /* Boot待機時間 */
+#define READTIME 1000   /* 読み込み時間 */
+
 #define BAUTRATE 9600   /* BautRate */
 
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
@@ -44,7 +47,7 @@ void setRtcConfig(){
     //timerレジスタ
     Wire.write(0x00);       // 0D CLKOUT
     Wire.write(0b10000010); // 0E TimerControl
-    Wire.write(0b00001111); // 0F Timer 15秒設定
+    Wire.write(0b00000011); // 0F Timer 5秒設定
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
@@ -128,16 +131,15 @@ void interrput()
 
 /* LoraからDataを送る関数 */
 void sendLoraData(){
-    delay(1000);
-    LoraSerial.println("TestData_1");
-    delay(1000);
-    LoraSerial.println("TestData_2");
-    delay(1000);
-    LoraSerial.println("TestData_3");
-    delay(1000);
-    LoraSerial.println("TestData_4");
-    delay(1000);
-    LoraSerial.println("TestData_5");
+    String SendData = "TestData_";
+    int timeCount = 0;
+
+    while(timeCount < MAXTIME){
+        SendData = SendData + String(timeCount);
+        LoraSerial.println(SendData);
+        timeCount++;
+        adelay(READTIME);
+    }
 }
 
 /* Main関数 */

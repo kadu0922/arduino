@@ -7,14 +7,16 @@
 #define RTCaddress 0xa2 >> 1
 //RTC8564のスレーブアドレスは『0xA2』固定だが、Wireライブラリでは7ビットでデバイス特定をするため、右に1ビットシフトさせて指定
 
-#define SLEEP_PIN 12    /*スリープピン*/
-#define RST_PIN 13      /*リセットピン*/
-#define LORA_RX 4       /*Software_RX_4*/
-#define LORA_TX 5       /*Software_TX_5*/
-#define CMDDELAY 100    /*CMD待機時間*/
-#define BOOTDELAY 1500  /*Boot待機時間*/
-#define BAUTRATE 9600   /*BautRate*/
-#define READTIME 1000   /*読み込み時間*/
+#define MAXTIME 8       /* sleep時間を合わせる定義*/
+#define SLEEP_PIN 12    /* スリープピン */
+#define RST_PIN 13      /* リセットピン */
+#define LORA_RX 4       /* Software_RX_4 */
+#define LORA_TX 5       /* Software_TX_5 */
+#define CMDDELAY 100    /* CMD待機時間 */
+#define BOOTDELAY 1500  /* Boot待機時間 */
+#define READTIME 1000   /* 読み込み時間 */
+
+#define BAUTRATE 9600   /* BautRate */
 
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
@@ -45,7 +47,7 @@ void setRtcConfig(){
     //timerレジスタ
     Wire.write(0x00);       // 0D CLKOUT
     Wire.write(0b10000010); // 0E TimerControl
-    Wire.write(0b00001111); // 0F Timer 15秒設定
+    Wire.write(0b00000010); // 0F Timer 2秒設定
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
@@ -130,14 +132,18 @@ void interrput()
 /* LoraからDataを読み出す関数*/
 void readLoraData(){
     String Data;
-    if(LoraSerial.read() == -1){
-        Serial.println("Nothing Data");
-    }else{
-        Data = LoraSerial.readStringUntil('\r\n');//CRおよびLFのため
-        clearBuffer();
-        Serial.println(Data.substring(11)); //データ部分だけ表示
+    int timeCount = 0; //delay用カウント
+    while(timeCount < MAXTIME){
+        if(LoraSerial.read() == -1){
+            Serial.println("Nothing Data");
+        }else{
+            Data = LoraSerial.readStringUntil('\r\n');//CRおよびLFのため
+            clearBuffer();
+            Serial.println(Data.substring(11)); //データ部分だけ表示
+        }
+        timeCount++;
+        delay(READTIME);
     }
-    delay(READTIME);
 }
 
 /* Main関数 */
@@ -162,21 +168,15 @@ void setup()
 
 void loop()
 {
-    int n = 0;
     sleep_enable();     //スリープを有効化
     sleep_cpu();        //スリープ開始(ここでプログラムは停止する)
     sleep_disable();    //スリープを無効化
     digitalWrite(LED, 1);
     digitalWrite(SLEEP_PIN, LOW);        //Lora Acctive_mode
     digitalWrite(LED, 1);
-    while (n < 5)
-    {
-        Serial.println("-----------------");
-        readLoraData();
-        n++;
-    }
 
-    n = 0;
+    readLoraData();
+
     setRtcConfig();//RTCをリセットするための設定
     Serial.println("GoodNight!");
     setSystemSleep();    
