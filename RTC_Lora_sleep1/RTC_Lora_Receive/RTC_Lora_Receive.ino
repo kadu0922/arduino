@@ -9,8 +9,8 @@
 
 #define SLEEP_PIN 12    /*スリープピン*/
 #define RST_PIN 13      /*リセットピン*/
-#define LORA_RX 4       /*Software_RX_2*/
-#define LORA_TX 5       /*Software_TX_3*/
+#define LORA_RX 4       /*Software_RX_4*/
+#define LORA_TX 5       /*Software_TX_5*/
 #define CMDDELAY 100    /*CMD待機時間*/
 #define BOOTDELAY 1500  /*Boot待機時間*/
 #define BAUTRATE 9600   /*BautRate*/
