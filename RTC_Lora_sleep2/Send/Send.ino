@@ -51,7 +51,7 @@ void setRtcConfig(){
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
-    Wire.write(0b00010001); //Control 2 Ti/Tp = 1 TIE = 1
+    Wire.write(0b00000001); //Control 2 Ti/Tp = 0 TIE = 1
     Wire.endTransmission();
 }
 
