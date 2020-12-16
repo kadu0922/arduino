@@ -125,8 +125,8 @@ void setSystemSleep(){
 /* Sleepを解除する割り込み関数 */
 void interrput()
 {
-    Serial.println("interrupt_message");
-    Serial.println("light up LED 5s");
+    Serial.println("light up LED");
+    Serial.println("I'm receive");
 }
 
 /* LoraからDataを読み出す関数*/
