@@ -129,15 +129,15 @@ void interrput()
 /* LoraからDataを送る関数 */
 void loraDataSend(){
     delay(1000);
-    LoraSerial.println("hooooooooooooooooooooooooogedesuwaaaaaa");
+    LoraSerial.println("TestData_1");
     delay(1000);
-    LoraSerial.println("hooooooooooooooooooooooooogedesuwaaaaaa");
+    LoraSerial.println("TestData_2");
     delay(1000);
-    LoraSerial.println("hooooooooooooooooooooooooogedesuwaaaaaa");
+    LoraSerial.println("TestData_3");
     delay(1000);
-    LoraSerial.println("hooooooooooooooooooooooooogedesuwaaaaaa");
+    LoraSerial.println("TestData_4");
     delay(1000);
-    LoraSerial.println("hooooooooooooooooooooooooogedesuwaaaaaa");
+    LoraSerial.println("TestData_5");
 }
 
 /* Main関数 */
