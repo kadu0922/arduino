@@ -15,6 +15,7 @@
 #define CMDDELAY 100    /* CMD待機時間 */
 #define BOOTDELAY 1500  /* Boot待機時間 */
 #define READTIME 1000   /* 読み込み時間 */
+#define SENDTIME 1000   /* 送信時間 */
 
 #define BAUTRATE 9600   /* BautRate */
 
@@ -135,15 +136,20 @@ void setReadSendLoraData(){
     int timeCount = 0; //delay用カウント
     while(timeCount < MAXTIME){
         if(LoraSerial.read() == -1){
+            delay(READTIME);
             Serial.println("Nothing Data");     //シリアルモニターに表示
             delay(READTIME);
-            LoraSerial.println("Noting Data");  //Loraで送信する
+            LoraSerial.println("Relay1NotingData");  //Loraで送信する
+            LoraSerial.flush();
         }else{
-            Data = LoraSerial.readStringUntil('\r\n');//CRおよびLFのため
+            Data = LoraSerial.readStringUntil(10);//ラインフィードまで格納する
             clearBuffer();
+            delay(READTIME);
             Serial.println(Data.substring(11)); //データ部分だけ表示シリアルモニターで表示
             delay(READTIME);
+            Data.remove(Data.indexOf('\n'),2);
             LoraSerial.println(Data.substring(11));  //Loraで送信する
+            LoraSerial.flush();
         }
         timeCount++;
     }
