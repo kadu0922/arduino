@@ -176,7 +176,7 @@ void loop()
 
     digitalWrite(SLEEP_PIN, LOW);         //Lora Acctive_mode
     digitalWrite(LED, 1);
-    sendLoraData();                     //loraDatasend
+    setReadSendLoraData();                     //loraDatasend
     
     setRtcConfig();                     //RTCをリセットするための設定
     

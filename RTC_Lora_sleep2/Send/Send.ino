@@ -138,7 +138,7 @@ void sendLoraData(){
         SendData = SendData + String(timeCount);
         LoraSerial.println(SendData);
         timeCount++;
-        adelay(READTIME);
+        delay(READTIME);
     }
 }
 
