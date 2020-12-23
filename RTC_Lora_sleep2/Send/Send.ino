@@ -15,14 +15,53 @@
 #define CMDDELAY 100    /* CMD待機時間 */
 #define BOOTDELAY 1500  /* Boot待機時間 */
 
-#define SENDTIME 3000   /* 他のプログラムのread + send の合計値 */
+#define SENDTIME 2000 /*send待機時間*/   
 
 #define BAUTRATE 9600   /* BautRate */
 
+boolean SLEEP_FLAG = true; /* true = active false = sleep */ 
+boolean PACKET_FLAG = false; /* true = パケットキャプチャ成功　false = パケットキャプチャ失敗 */
+
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
-/* RTCの設定を初期化する関数 */
-void setRtcConfig(){
+
+/* Sleep用RTCの設定を初期化する関数 */
+void setSleepRtcConfig(){
+    Wire.begin(); // arudinoをマスターとして接続
+    delay(1000);  // 発振子の動作待機
+
+    Wire.beginTransmission(RTCaddress); //接続するIC2のモジュールを選択
+    Wire.write(0x00);                   // データを転送するレジスタ番号を指定
+    Wire.write(0b00100000);                   // 00 Control 1　STOP = 1 動作停止
+    Wire.write(0x00);                         // 01 Control 2 
+    Wire.write(0b00000001);                   // 02 Seconds　
+    Wire.write(0b00000000);                   // 03 Minutes
+    Wire.write(0b00000000);                   // 04 Hours
+    Wire.write(0b00000001);                   // 05 Days
+    Wire.write(0b00000001);                   // 06 Weekdays
+    Wire.write(0b00000001);                   // 07 Months
+    Wire.write(0b00100000);                   // 08 Years
+    //20年1月１日00:00に設定
+
+    //Alram レジスタ
+    Wire.write(0x00);       // 09 Minutes Alarm　
+    Wire.write(0x00);       // 0A Hours Alarm
+    Wire.write(0x00);       // 0B Days Alarm
+    Wire.write(0x00);       // 0C Weekdays Alarm
+
+    //timerレジスタ
+    Wire.write(0x00);       // 0D CLKOUT
+    Wire.write(0b10000010); // 0E TimerControl
+    Wire.write(0b00001010); // 0F Timer 10秒設定
+
+    // Control 設定
+    Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
+    Wire.write(0b00000001); //Control 2 Ti/Tp = 0 TIE = 1
+    Wire.endTransmission();
+}
+
+/* パケット待機用RTCの設定を初期化する関数 */
+void setPacketRtcConfig(){
     Wire.begin(); // arudinoをマスターとして接続
     delay(1000);  // 発振子の動作待機
 
@@ -126,20 +165,27 @@ void setSystemSleep(){
 /* Sleepを解除する割り込み関数 */
 void interrput()
 {
-    Serial.println("interrupt_message");
-    Serial.println("light up LED 5s");
+    if(SLEEP_FLAG){
+        Serial.println("sendLora light up LED 10s");
+        SLEEP_FLAG = false; //sleepフラグ初期化
+        PACKET_FLAG = false; //packetフラグ初期化
+    }else{
+        PACKET_FLAG = true;
+        SLEEP_FLAG = true;
+    }
 }
 
 /* LoraからDataを送る関数 */
 void sendLoraData(){
-    String SendData = "TestData_";
-    int timeCount = 0;
+    delay(SENDTIME);
+    String SendData = "TestData_hogehoge";
+    LoraSerial.println(SendData);
 
-    while(timeCount < MAXTIME){
-        SendData = SendData + String(timeCount);
-        LoraSerial.println(SendData);
-        timeCount++;
-        delay(SENDTIME);//送信間隔をあけるため　
+    //残り時間の処理
+    while (!PACKET_FLAG)
+    {
+        Serial.println(PACKET_FLAG);
+        if(PACKET_FLAG) break;
     }
 }
 
@@ -160,7 +206,7 @@ void setup()
     setSystemSleep();
     setRestartLora();
     setLoraInit();
-    setRtcConfig();
+    setSleepRtcConfig();
 }
 
 void loop()
@@ -171,11 +217,13 @@ void loop()
 
     digitalWrite(SLEEP_PIN, LOW);         //Lora Acctive_mode
     digitalWrite(LED, 1);
+    setPacketRtcConfig();                  //packetキャプチャ用のrtcの設定
+
     sendLoraData();                     //loraDatasend
-    
-    setRtcConfig();                     //RTCをリセットするための設定
-    
+        
     Serial.println("GoodNight!");
+    setSleepRtcConfig();                     //RTCをリセットするための設定
+
     setSystemSleep();                   //System Sleep_mode
     digitalWrite(LED, 0);
 }

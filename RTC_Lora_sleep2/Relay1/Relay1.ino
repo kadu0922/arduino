@@ -19,10 +19,13 @@
 
 #define BAUTRATE 9600   /* BautRate */
 
+boolean SLEEP_FLAG = true; /* true = active false = sleep */ 
+boolean PACKET_FLAG = false; /* true = パケットキャプチャ成功　false = パケットキャプチャ失敗 */
+
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
 /* RTCの設定を初期化する関数 */
-void setRtcConfig(){
+void setSleepRtcConfig(){
     Wire.begin(); // arudinoをマスターとして接続
     delay(1000);  // 発振子の動作待機
 
@@ -48,7 +51,41 @@ void setRtcConfig(){
     //timerレジスタ
     Wire.write(0x00);       // 0D CLKOUT
     Wire.write(0b10000010); // 0E TimerControl
-    Wire.write(0b00000100); // 0F Timer 4秒設定
+    Wire.write(0b00001001); // 0F Timer 9秒設定
+
+    // Control 設定
+    Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
+    Wire.write(0b00000001); //Control 2 Ti/Tp = 0 TIE = 1
+    Wire.endTransmission();
+}
+
+void setPacketRtcConfig(){
+    Wire.begin(); // arudinoをマスターとして接続
+    delay(1000);  // 発振子の動作待機
+
+    Wire.beginTransmission(RTCaddress); //接続するIC2のモジュールを選択
+    Wire.write(0x00);                   // データを転送するレジスタ番号を指定
+    Wire.write(0b00100000);                   // 00 Control 1　STOP = 1 動作停止
+    Wire.write(0x00);                         // 01 Control 2 
+    Wire.write(0b00000001);                   // 02 Seconds　
+    Wire.write(0b00000000);                   // 03 Minutes
+    Wire.write(0b00000000);                   // 04 Hours
+    Wire.write(0b00000001);                   // 05 Days
+    Wire.write(0b00000001);                   // 06 Weekdays
+    Wire.write(0b00000001);                   // 07 Months
+    Wire.write(0b00100000);                   // 08 Years
+    //20年1月１日00:00に設定
+
+    //Alram レジスタ
+    Wire.write(0x00);       // 09 Minutes Alarm　
+    Wire.write(0x00);       // 0A Hours Alarm
+    Wire.write(0x00);       // 0B Days Alarm
+    Wire.write(0x00);       // 0C Weekdays Alarm
+
+    //timerレジスタ
+    Wire.write(0x00);       // 0D CLKOUT
+    Wire.write(0b10000010); // 0E TimerControl
+    Wire.write(0b00000110); // 0F Timer 6秒設定
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
@@ -126,30 +163,35 @@ void setSystemSleep(){
 /* Sleepを解除する割り込み関数 */
 void interrput()
 {
-    Serial.println("light up LED");
-    Serial.println("I'm Relay1");
+    if (SLEEP_FLAG){
+        Serial.println("light up LED");
+        SLEEP_FLAG = false;  
+        PACKET_FLAG = false;
+    }else{
+        SLEEP_FLAG = true;  
+        PACKET_FLAG = true; 
+    }
+    
+
 }
 
 /* LoraからDataを読み出してデータ部を送る関数*/
 void setReadSendLoraData(){
     String Data;
-    int timeCount = 0; //delay用カウント
-    while(timeCount < MAXTIME){
-        delay(READTIME);
-        if(LoraSerial.read() == -1){
-            Serial.println("Nothing Data");     //シリアルモニターに表示
-            delay(SENDTIME);
-            LoraSerial.println("Relay1NotingData");  //Loraで送信する
-            LoraSerial.flush();
-        }else{
+    //int timeCount = 0; //delay用カウント
+    while(true){
+        if(PACKET_FLAG){
+            break;
+        }
+        if (LoraSerial.read() != -1){
             Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
             clearBuffer();
-            Serial.println(Data.substring(11)); //データ部分だけ表示シリアルモニターで表示
-            delay(SENDTIME);
-            LoraSerial.println(Data.substring(11));  //Loraで送信する
+            Data = Data.substring(11);
+            Serial.println(Data); //データ部分だけ表示シリアルモニターで表示
+            LoraSerial.println(Data);  //Loraで送信する
             LoraSerial.flush();
+            //break;
         }
-        timeCount++;
     }
 }
 
@@ -170,7 +212,7 @@ void setup()
     setSystemSleep();
     setRestartLora();
     setLoraInit();
-    setRtcConfig();
+    setSleepRtcConfig();
 }
 
 void loop()
@@ -181,9 +223,12 @@ void loop()
 
     digitalWrite(SLEEP_PIN, LOW);         //Lora Acctive_mode
     digitalWrite(LED, 1);
+
+    setPacketRtcConfig();                  //packetキャプチャ用のrtcの設定
     setReadSendLoraData();                    //loraDatasend
-    
-    setRtcConfig();                     //RTCをリセットするための設定
+        
+    Serial.println("GoodNight!");
+    setSleepRtcConfig();                     //RTCをリセットするための設定
     
     setSystemSleep();                   //System Sleep_mode
     digitalWrite(LED, 0);
