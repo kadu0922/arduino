@@ -14,8 +14,8 @@
 #define LORA_TX 5       /* Software_TX_5 */
 #define CMDDELAY 100    /* CMD待機時間 */
 #define BOOTDELAY 1500  /* Boot待機時間 */
-#define READTIME 1000   /* 読み込み時間 */
-#define SENDTIME 1000   /* 送信時間 */
+
+#define SENDTIME 3000   /* 他のプログラムのread + send の合計値 */
 
 #define BAUTRATE 9600   /* BautRate */
 
@@ -139,8 +139,7 @@ void sendLoraData(){
         SendData = SendData + String(timeCount);
         LoraSerial.println(SendData);
         timeCount++;
-        delay(SENDTIME);
-        delay(READTIME);
+        delay(SENDTIME);//送信間隔をあけるため　
     }
 }
 

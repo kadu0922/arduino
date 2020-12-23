@@ -14,8 +14,8 @@
 #define LORA_TX 5       /* Software_TX_5 */
 #define CMDDELAY 100    /* CMD待機時間 */
 #define BOOTDELAY 1500  /* Boot待機時間 */
-#define READTIME 1000   /* 読み込み時間 */
-#define SENDTIME 1000   /* 送信時間 */
+
+#define READTIME 3000   /* 他のプログラムのread + send の合計値 */
 
 #define BAUTRATE 9600   /* BautRate */
 
@@ -135,16 +135,13 @@ void readLoraData(){
     String Data;
     int timeCount = 0; //delay用カウント
     while(timeCount < MAXTIME){
+
+    delay(READTIME);    //読み込み間隔
         if(LoraSerial.read() == -1){
-            delay(SENDTIME);
-            delay(READTIME);    //他のものと合わせるため両方つける
             Serial.println("Nothing Data");
         }else{
-            Data = LoraSerial.readStringUntil('\r\n');//CRおよびLFのため
+            Data = LoraSerial.readStringUntil('\r');//CRおよびLFのため
             clearBuffer();
-
-            delay(SENDTIME);
-            delay(READTIME);    //他のものと合わせるため両方つける
             Serial.println(Data.substring(11)); //データ部分だけ表示
         }
         timeCount++;
