@@ -103,7 +103,7 @@ void setLoraInit() {
     //nodeの種別設定
     setLoraConfig("node 2");
     // bw（帯域幅の設定）
-    setLoraConfig("bw 4"); 
+    setLoraConfig("bw 5"); 
     // sf（拡散率の設定）
     setLoraConfig("sf 12"); 
     //channel設定

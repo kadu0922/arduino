@@ -120,7 +120,7 @@ void setLoraInit() {
     // RRSIの付与設定
     setLoraConfig("p 1"); 
     // sleepの設定
-    setLoraConfig("s 3"); 
+    setLoraConfig("s 1"); 
     // UART転送速度設定
     setLoraConfig("r 1"); 
     // 設定を保存する
@@ -177,15 +177,15 @@ void interrput()
 void setReadSendLoraData(){
     String Data;
     while(!PACKET_FLAG){
-        delay(10);
+        delay(100);
         if (LoraSerial.read() != -1){
-            PACKET_FLAG = true; //キャプチャ成功
+            
             Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
             clearBuffer();
-            Data = Data.substring(11);
-            Serial.println(Data); //データ部分だけ表示シリアルモニターで表示
             LoraSerial.println(Data);  //Loraで送信する
             LoraSerial.flush();
+
+            PACKET_FLAG = true; //キャプチャ成功
             /* 初回起動時はINIT_FLAGをfalseにする*/
             if(INIT_FLAG) INIT_FLAG = false;
         }
