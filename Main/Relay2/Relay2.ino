@@ -120,7 +120,7 @@ void setLoraInit() {
     // RRSIの付与設定
     setLoraConfig("p 1"); 
     // sleepの設定
-    setLoraConfig("s 1"); 
+    setLoraConfig("sleep 3"); 
     // UART転送速度設定
     setLoraConfig("r 1"); 
     // 設定を保存する
