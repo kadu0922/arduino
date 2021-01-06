@@ -102,7 +102,7 @@ void setLoraInit() {
     //nodeの種別設定
     setLoraConfig("node 2");
     // bw（帯域幅の設定）
-    setLoraConfig("bw 5"); 
+    setLoraConfig("bw 4"); 
     // sf（拡散率の設定）
     setLoraConfig("sf 12"); 
     //channel設定
@@ -177,7 +177,7 @@ void interrput()
 void setReadSendLoraData(){
     String Data;
     while(!PACKET_FLAG){
-        delay(100);
+        delay(10);
         if (LoraSerial.read() != -1){
             
             Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
@@ -205,7 +205,7 @@ void setup()
                                             // message 割り込み時に実行される関数
                                             // FALLING ピンの状態が HIGH → LOW になった時に割り込み
     Serial.begin(9600);                     //siralの速度
-    Serial.print("start!!\n---------------------------\n");
+    Serial.print("Lora2\n---------------------------\n");
 
     setRestartLora();
     setLoraInit();
