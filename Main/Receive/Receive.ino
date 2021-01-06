@@ -19,9 +19,9 @@
 
 #define BAUTRATE 9600   /* BautRate */
 
-boolean SLEEP_FLAG = true; /* true = active false = sleep */ 
+boolean SLEEP_FLAG = false; /* true = active false = sleep */
 boolean PACKET_FLAG = false; /* true = パケットキャプチャ成功　false = パケットキャプチャ失敗 */
-
+boolean INIT_FLAG = true; /* true = 初回起動　false = 二回目以降*/
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
 /* Sleep用RTCの設定を初期化する関数 */
@@ -156,44 +156,39 @@ void setRestartLora(){
 
 /* Arduino,Loraをスリープさせる関数 */
 void setSystemSleep(){
+    SLEEP_FLAG = true;
+    digitalWrite(LED, 0);                   //LED消灯
     digitalWrite(SLEEP_PIN, HIGH);          //Lora sleep_mode
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);    //スリープモード設定
+    sleep_enable();     //スリープを有効化
+    sleep_cpu();        //スリープ開始(ここでプログラムは停止する)
 }
 
 /* Sleepを解除する割り込み関数 */
 void interrput()
 {
-    if(SLEEP_FLAG){
-        Serial.println("ReceivedLora light up LED 10s");
+        Serial.println("Relay1 Lora");
         SLEEP_FLAG = false; //sleepフラグ初期化
         PACKET_FLAG = false; //packetフラグ初期化
-    }else{
-        PACKET_FLAG = true;
-        SLEEP_FLAG = true;
-    }
+        sleep_disable();    //スリープを無効化
 }
 
-/* LoraからDataを読み出す関数*/
-void readLoraData(){
+/* LoraからDataを読み出してデータ部を送る関数*/
+void setReadSendLoraData(){
     String Data;
-
-    while(true){
+    while(!PACKET_FLAG){
+        delay(10);
         if (LoraSerial.read() != -1){
-            Data = LoraSerial.readStringUntil('\r');//CRおよびLFのため
+            PACKET_FLAG = true; //キャプチャ成功
+            Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
             clearBuffer();
-            Serial.println("ReciveData");
-            Serial.println("----------------------------------------");
-            Serial.println(Data/*.substring(11)*/); //データ部分だけ表示
+            Data = Data.substring(11);
+            Serial.println(Data); //データ部分だけ表示シリアルモニターで表示
+            LoraSerial.println(Data);  //Loraで送信する
+            LoraSerial.flush();
+            /* 初回起動時はINIT_FLAGをfalseにする*/
+            if(INIT_FLAG) INIT_FLAG = false;
         }
-        if(PACKET_FLAG){
-            break;
-        }
-    }
-
-    //残り時間の処理
-    while (PACKET_FLAG == false)
-    {
-        if(PACKET_FLAG) break;
     }
 }
 
@@ -211,25 +206,23 @@ void setup()
     Serial.begin(9600);                     //siralの速度
     Serial.print("start!!\n---------------------------\n");
 
-    setSystemSleep();
     setRestartLora();
     setLoraInit();
-    setSleepRtcConfig(); 
+    delay(1500);
+
+    LoraSerial.readStringUntil(10); //OKの文字列を読み飛ばす
+    digitalWrite(LED, 1);
 }
 
 void loop()
 {
-    sleep_enable();     //スリープを有効化
-    sleep_cpu();        //スリープ開始(ここでプログラムは停止する)
-    sleep_disable();    //スリープを無効化
-    digitalWrite(LED, 1);
-    digitalWrite(SLEEP_PIN, LOW);        //Lora Acctive_mode
-    setPacketRtcConfig();  
-
-    readLoraData();
-    Serial.println("GoodNight!");
-
-    setSleepRtcConfig();    
-    setSystemSleep();    
-    digitalWrite(LED, 0);
+    //初回起動はパケットを受け取るまで待機
+    while (INIT_FLAG)
+    {
+        setReadSendLoraData();
+        if(!INIT_FLAG){
+            setSleepRtcConfig();
+            setSystemSleep();
+        }
+    }
 }
