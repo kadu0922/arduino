@@ -19,7 +19,7 @@
 
 #define BAUTRATE 9600   /* BautRate */
 
-boolean SLEEP_FLAG = false; /* true = active false = sleep */ 
+boolean SLEEP_FLAG = false; /* true = active false = sleep */
 boolean PACKET_FLAG = false; /* true = パケットキャプチャ成功　false = パケットキャプチャ失敗 */
 boolean INIT_FLAG = true; /* true = 初回起動　false = 二回目以降*/
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
@@ -179,12 +179,8 @@ void interrput()
 void setReadSendLoraData(){
     String Data;
     while(!PACKET_FLAG){
-        int x = LoraSerial.read();
-        
-        Serial.print("X=");
-        Serial.println(x);
-
-        if (x != -1){
+        delay(10);
+        if (LoraSerial.read() != -1){
             PACKET_FLAG = true; //キャプチャ成功
             Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
             clearBuffer();
@@ -192,7 +188,6 @@ void setReadSendLoraData(){
             Serial.println(Data); //データ部分だけ表示シリアルモニターで表示
             LoraSerial.println(Data);  //Loraで送信する
             LoraSerial.flush();
-
             /* 初回起動時はINIT_FLAGをfalseにする*/
             if(INIT_FLAG) INIT_FLAG = false;
         }
@@ -217,7 +212,7 @@ void setup()
     setRestartLora();
     setLoraInit();
     delay(1500);
-    
+
     LoraSerial.readStringUntil(10); //OKの文字列を読み飛ばす
     digitalWrite(LED, 1);
 }
@@ -229,8 +224,8 @@ void loop()
     {
         setReadSendLoraData();
         if(!INIT_FLAG){
-            setSleepRtcConfig();  
+            setSleepRtcConfig();
             setSystemSleep();
-        } 
+        }
     }
 }
