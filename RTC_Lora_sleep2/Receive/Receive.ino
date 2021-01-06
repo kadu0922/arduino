@@ -95,7 +95,7 @@ void setPacketRtcConfig(){
 
 /* loraの初期化関数 */
 void setLoraInit() {
-    Serial.println("Start...");
+    Serial.println("LoRa Start...");
     // コマンドモード開始
     setLoraConfig("2"); 
     //nodeの種別設定
@@ -181,7 +181,9 @@ void readLoraData(){
         if (LoraSerial.read() != -1){
             Data = LoraSerial.readStringUntil('\r');//CRおよびLFのため
             clearBuffer();
-            Serial.println(Data.substring(11)); //データ部分だけ表示
+            Serial.println("ReciveData");
+            Serial.println("----------------------------------------");
+            Serial.println(Data/*.substring(11)*/); //データ部分だけ表示
         }
         if(PACKET_FLAG){
             break;

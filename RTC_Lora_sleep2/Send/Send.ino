@@ -97,7 +97,7 @@ void setPacketRtcConfig(){
 
 /* loraの初期化関数 */
 void setLoraInit() {
-    Serial.println("Start...");
+    Serial.println("LoRa Start...");
     // コマンドモード開始
     setLoraConfig("2"); 
     //nodeの種別設定
