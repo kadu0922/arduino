@@ -19,7 +19,7 @@
 
 #define BAUTRATE 9600   /* BautRate */
 
-boolean SLEEP_FLAG = true; /* true = active false = sleep */ 
+boolean SLEEP_FLAG = false; /* true = active false = sleep */ 
 boolean PACKET_FLAG = false; /* true = パケットキャプチャ成功　false = パケットキャプチャ失敗 */
 boolean INIT_FLAG = true; /* true = 初回起動　false = 二回目以降*/
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
@@ -103,7 +103,7 @@ void setLoraInit() {
     //nodeの種別設定
     setLoraConfig("node 2");
     // bw（帯域幅の設定）
-    setLoraConfig("bw 5"); 
+    setLoraConfig("bw 4"); 
     // sf（拡散率の設定）
     setLoraConfig("sf 12"); 
     //channel設定
@@ -159,7 +159,7 @@ void setRestartLora(){
 /* Arduino,Loraをスリープさせる関数 */
 void setSystemSleep(){
     SLEEP_FLAG = true;
-
+    digitalWrite(LED, 0);                   //LED消灯
     digitalWrite(SLEEP_PIN, HIGH);          //Lora sleep_mode
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);    //スリープモード設定
     sleep_enable();     //スリープを有効化
@@ -179,7 +179,12 @@ void interrput()
 void setReadSendLoraData(){
     String Data;
     while(!PACKET_FLAG){
-        if (LoraSerial.read() != -1){
+        int x = LoraSerial.read();
+        
+        Serial.print("X=");
+        Serial.println(x);
+
+        if (x != -1){
             PACKET_FLAG = true; //キャプチャ成功
             Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
             clearBuffer();
@@ -201,6 +206,7 @@ void setup()
     digitalWrite(SLEEP_PIN, LOW);      //Low = active_mode　High = sleep_mode
 
     pinMode(LED, OUTPUT);                   //13を出力設定(LED用)
+    
     pinMode(INPIN, INPUT_PULLUP);           //2番をプルアップ設定
     attachInterrupt(0, interrput, FALLING); // 外部割り込みを開始する。
                                             // message 割り込み時に実行される関数
@@ -210,7 +216,10 @@ void setup()
 
     setRestartLora();
     setLoraInit();
-    setSleepRtcConfig();
+    delay(1500);
+    
+    LoraSerial.readStringUntil(10); //OKの文字列を読み飛ばす
+    digitalWrite(LED, 1);
 }
 
 void loop()
@@ -219,6 +228,9 @@ void loop()
     while (INIT_FLAG)
     {
         setReadSendLoraData();
-        if(!INIT_FLAG) setSystemSleep();
+        if(!INIT_FLAG){
+            setSleepRtcConfig();  
+            setSystemSleep();
+        } 
     }
 }
