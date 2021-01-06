@@ -175,17 +175,23 @@ void interrput()
     }
 }
 
-/* LoraからDataを送る関数 */
-void sendLoraData(){
-    delay(SENDTIME);
-    String SendData = "TestData_hogehoge";
-    LoraSerial.println(SendData);
-
-    //残り時間の処理
-    while (!PACKET_FLAG)
-    {
-        Serial.println(PACKET_FLAG);
-        if(PACKET_FLAG) break;
+/* LoraからDataを読み出してデータ部を送る関数*/
+void setReadSendLoraData(){
+    String Data;
+    //int timeCount = 0; //delay用カウント
+    while(true){
+        if(PACKET_FLAG){
+            break;
+        }
+        if (LoraSerial.read() != -1){
+            Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
+            clearBuffer();
+            Data = Data.substring(11);
+            Serial.println(Data); //データ部分だけ表示シリアルモニターで表示
+            LoraSerial.println(Data);  //Loraで送信する
+            LoraSerial.flush();
+            //break;
+        }
     }
 }
 
