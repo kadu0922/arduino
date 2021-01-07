@@ -7,7 +7,6 @@
 #define RTCaddress 0xa2 >> 1
 //RTC8564のスレーブアドレスは『0xA2』固定だが、Wireライブラリでは7ビットでデバイス特定をするため、右に1ビットシフトさせて指定
 
-#define MAXTIME 8       /* sleep時間を合わせる定義*/
 #define SLEEP_PIN 12    /* スリープピン */
 #define RST_PIN 13      /* リセットピン */
 #define LORA_RX 4       /* Software_RX_4 */
@@ -15,13 +14,12 @@
 #define CMDDELAY 100    /* CMD待機時間 */
 #define BOOTDELAY 1500  /* Boot待機時間 */
 
-#define READTIME 3000   /* 他のプログラムのread + send の合計値 */
-
 #define BAUTRATE 9600   /* BautRate */
 
 boolean SLEEP_FLAG = false; /* true = active false = sleep */
 boolean PACKET_FLAG = false; /* true = パケットキャプチャ成功　false = パケットキャプチャ失敗 */
 boolean INIT_FLAG = true; /* true = 初回起動　false = 二回目以降*/
+
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
 /* Sleep用RTCの設定を初期化する関数 */
@@ -186,6 +184,7 @@ void setReadSendLoraData(){
             Serial.println(Data); //データ部分だけ表示シリアルモニターで表示
             LoraSerial.println(Data);  //Loraで送信する
             LoraSerial.flush();
+
             /* 初回起動時はINIT_FLAGをfalseにする*/
             if(INIT_FLAG) INIT_FLAG = false;
         }
@@ -212,6 +211,7 @@ void setup()
 
     LoraSerial.readStringUntil(10); //OKの文字列を読み飛ばす
     digitalWrite(LED, 1);
+    
 }
 
 void loop()

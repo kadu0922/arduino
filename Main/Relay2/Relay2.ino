@@ -7,22 +7,19 @@
 #define RTCaddress 0xa2 >> 1
 //RTC8564のスレーブアドレスは『0xA2』固定だが、Wireライブラリでは7ビットでデバイス特定をするため、右に1ビットシフトさせて指定
 
-#define MAXTIME 6       /* sleep時間を合わせる定義*/
 #define SLEEP_PIN 12    /* スリープピン */
 #define RST_PIN 13      /* リセットピン */
 #define LORA_RX 4       /* Software_RX_4 */
 #define LORA_TX 5       /* Software_TX_5 */
 #define CMDDELAY 100    /* CMD待機時間 */
 #define BOOTDELAY 1500  /* Boot待機時間 */
-#define READTIME 2000   /* 読み込み時間 */
-#define SENDTIME 1000   /* 送信時間 */
 
 #define BAUTRATE 9600   /* BautRate */
-
 
 boolean SLEEP_FLAG = false; /* true = active false = sleep */
 boolean PACKET_FLAG = false; /* true = パケットキャプチャ成功　false = パケットキャプチャ失敗 */
 boolean INIT_FLAG = true; /* true = 初回起動　false = 二回目以降*/
+
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
 /* RTCの設定を初期化する関数 */
