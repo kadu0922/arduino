@@ -7,7 +7,6 @@
 #define RTCaddress 0xa2 >> 1
 //RTC8564のスレーブアドレスは『0xA2』固定だが、Wireライブラリでは7ビットでデバイス特定をするため、右に1ビットシフトさせて指定
 
-#define MAXTIME 8       /* sleep時間を合わせる定義*/
 #define SLEEP_PIN 12    /* スリープピン */
 #define RST_PIN 13      /* リセットピン */
 #define LORA_RX 4       /* Software_RX_4 */
@@ -15,12 +14,11 @@
 #define CMDDELAY 100    /* CMD待機時間 */
 #define BOOTDELAY 1500  /* Boot待機時間 */
 
-#define READTIME 3000   /* 他のプログラムのread + send の合計値 */
-
 #define BAUTRATE 9600   /* BautRate */
 
-boolean SLEEP_FLAG = true; /* true = active false = sleep */ 
+boolean SLEEP_FLAG = false; /* true = active false = sleep */
 boolean PACKET_FLAG = false; /* true = パケットキャプチャ成功　false = パケットキャプチャ失敗 */
+boolean INIT_FLAG = true; /* true = 初回起動　false = 二回目以降*/
 
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
@@ -101,7 +99,7 @@ void setLoraInit() {
     //nodeの種別設定
     setLoraConfig("node 2");
     // bw（帯域幅の設定）
-    setLoraConfig("bw 5"); 
+    setLoraConfig("bw 4"); 
     // sf（拡散率の設定）
     setLoraConfig("sf 12"); 
     //channel設定
@@ -156,44 +154,53 @@ void setRestartLora(){
 
 /* Arduino,Loraをスリープさせる関数 */
 void setSystemSleep(){
+    SLEEP_FLAG = true;
+    digitalWrite(LED, 0);                   //LED消灯
     digitalWrite(SLEEP_PIN, HIGH);          //Lora sleep_mode
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);    //スリープモード設定
+    sleep_enable();     //スリープを有効化
+    sleep_cpu();        //スリープ開始(ここでプログラムは停止する)
 }
 
 /* Sleepを解除する割り込み関数 */
 void interrput()
 {
-    if(SLEEP_FLAG){
-        Serial.println("ReceivedLora light up LED 10s");
+        Serial.println("Relay1 Lora");
         SLEEP_FLAG = false; //sleepフラグ初期化
         PACKET_FLAG = false; //packetフラグ初期化
-    }else{
-        PACKET_FLAG = true;
-        SLEEP_FLAG = true;
+        sleep_disable();    //スリープを無効化
+}
+
+/* LoraからDataを読み出してデータ部を送る関数*/
+void setReadSendLoraData(){
+    String Data;
+    while(!PACKET_FLAG){
+        delay(10);
+        if (LoraSerial.read() != -1){
+            PACKET_FLAG = true; //キャプチャ成功
+            Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
+            clearBuffer();
+            Data = Data.substring(11);
+            Serial.println(Data); //データ部分だけ表示シリアルモニターで表示
+            LoraSerial.println(Data);  //Loraで送信する
+            LoraSerial.flush();
+
+            /* 初回起動時はINIT_FLAGをfalseにする*/
+            if(INIT_FLAG) INIT_FLAG = false;
+        }
     }
 }
 
-/* LoraからDataを読み出す関数*/
-void readLoraData(){
-    String Data;
-
-    while(true){
-        if (LoraSerial.read() != -1){
-            Data = LoraSerial.readStringUntil('\r');//CRおよびLFのため
-            clearBuffer();
-            Serial.println("ReciveData");
-            Serial.println("----------------------------------------");
-            Serial.println(Data/*.substring(11)*/); //データ部分だけ表示
-        }
-        if(PACKET_FLAG){
-            break;
-        }
-    }
-
-    //残り時間の処理
-    while (PACKET_FLAG == false)
+void setSystemInit(){
+    digitalWrite(LED, 1);
+    //初回起動はパケットを受け取るまで待機
+    while (INIT_FLAG)
     {
-        if(PACKET_FLAG) break;
+        setReadSendLoraData();
+        if(!INIT_FLAG){
+            setSleepRtcConfig();
+            setSystemSleep();
+        }
     }
 }
 
@@ -209,27 +216,18 @@ void setup()
                                             // message 割り込み時に実行される関数
                                             // FALLING ピンの状態が HIGH → LOW になった時に割り込み
     Serial.begin(9600);                     //siralの速度
-    Serial.print("start!!\n---------------------------\n");
+    Serial.print("Receive!!\n---------------------------\n");
 
-    setSystemSleep();
     setRestartLora();
     setLoraInit();
-    setSleepRtcConfig(); 
+    delay(1500);
+
+    LoraSerial.readStringUntil(10); //OKの文字列を読み飛ばす
+
+    setSystemInit();
 }
 
 void loop()
 {
-    sleep_enable();     //スリープを有効化
-    sleep_cpu();        //スリープ開始(ここでプログラムは停止する)
-    sleep_disable();    //スリープを無効化
-    digitalWrite(LED, 1);
-    digitalWrite(SLEEP_PIN, LOW);        //Lora Acctive_mode
-    setPacketRtcConfig();  
 
-    readLoraData();
-    Serial.println("GoodNight!");
-
-    setSleepRtcConfig();    
-    setSystemSleep();    
-    digitalWrite(LED, 0);
 }
