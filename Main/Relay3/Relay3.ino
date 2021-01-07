@@ -16,14 +16,16 @@
 
 #define BAUTRATE 9600   /* BautRate */
 
-boolean SLEEP_FLAG = false; /* true = active false = sleep */
+boolean RTC_FLAG = true; /* true = PACKET時間管理 false = sleep時間管理 */
 boolean PACKET_FLAG = false; /* true = パケットキャプチャ成功　false = パケットキャプチャ失敗 */
 boolean INIT_FLAG = true; /* true = 初回起動　false = 二回目以降*/
 
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
-/* RTCの設定を初期化する関数 */
+/* Sleep用RTCの設定を初期化する関数 */
 void setSleepRtcConfig(){
+    RTC_FLAG = false;
+
     Wire.begin(); // arudinoをマスターとして接続
     delay(1000);  // 発振子の動作待機
 
@@ -58,6 +60,8 @@ void setSleepRtcConfig(){
 }
 
 void setPacketRtcConfig(){
+    RTC_FLAG = true;
+
     Wire.begin(); // arudinoをマスターとして接続
     delay(1000);  // 発振子の動作待機
 
@@ -155,7 +159,6 @@ void setRestartLora(){
 /* Arduino,Loraをスリープさせる関数 */
 /* Arduino,Loraをスリープさせる関数 */
 void setSystemSleep(){
-    SLEEP_FLAG = true;
     digitalWrite(LED, 0);                   //LED消灯
     digitalWrite(SLEEP_PIN, HIGH);          //Lora sleep_mode
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);    //スリープモード設定
@@ -167,7 +170,6 @@ void setSystemSleep(){
 void interrput()
 {
         Serial.println("Relay1 Lora");
-        SLEEP_FLAG = false; //sleepフラグ初期化
         PACKET_FLAG = false; //packetフラグ初期化
         sleep_disable();    //スリープを無効化
 }
