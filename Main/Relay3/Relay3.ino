@@ -231,13 +231,5 @@ void setup()
 
 void loop()
 {
-    //初回起動はパケットを受け取るまで待機
-    while (INIT_FLAG)
-    {
-        setReadSendLoraData();
-        if(!INIT_FLAG){
-            setSleepRtcConfig();
-            setSystemSleep();
-        }
-    }
+
 }
