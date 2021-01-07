@@ -53,7 +53,7 @@ void setSleepRtcConfig(){
     //timerレジスタ
     Wire.write(0x00);       // 0D CLKOUT
     Wire.write(0b10000010); // 0E TimerControl
-    Wire.write(0b00111100); // 0F Timer 60秒設定
+    Wire.write(0b00001111); // 0F Timer 15秒設定
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
@@ -160,6 +160,8 @@ void setRestartLora(){
 
 /* Arduino,Loraをスリープさせる関数 */
 void setSystemSleep(){
+    Serial.println("----SLLEP----Lora1-----");
+    WAIT_FLAG = false;
     digitalWrite(LED, 0);                   //LED消灯
     digitalWrite(SLEEP_PIN, HIGH);          //Lora sleep_mode
     setSleepRtcConfig();                    //RTCをスリープように変更する
@@ -171,21 +173,16 @@ void setSystemSleep(){
 /* 割り込み関数 */
 void interrput()
 {
-    /* true:パケット待機時間の終了 false:sleep復帰時の処理 */
     if(RTC_FLAG){ 
-        WAIT_FLAG = false 
-    }else{
-    Serial.println("----HELLO----Lora1-----");
-    digitalWrite(LED, 1);   //LED on
-    PACKET_FLAG = false;    //packetフラグ初期化
-    sleep_disable();        //スリープを無効化
-    setPacketRtcConfig()    //RTCをパケット待ち状態にする
+        Serial.println("----WAIT----Lora1-----");
+        WAIT_FLAG = true;
     }
 }
 
 /* LoraからDataを読み出してデータ部を送る関数*/
 void setReadSendLoraData(){
     String Data;
+
     while(!PACKET_FLAG){
         delay(10);
         if (LoraSerial.read() != -1){
@@ -199,23 +196,20 @@ void setReadSendLoraData(){
             /* 初回起動時はINIT_FLAGをfalseにする*/
             if(INIT_FLAG) INIT_FLAG = false;
         }
+        /*パケット待機時間が終了したとき抜ける*/
+        if(WAIT_FLAG) break;
     }
-    /*パケット待機時間が残ったとき消費する*/
-    while (WAIT_FLAG){
-        delay(10);
-    }
+
 }
 
 void setSystemInit(){
     digitalWrite(LED, 1);
     //初回起動はパケットを受け取るまで待機
-    while (INIT_FLAG)
-    {
+
         setReadSendLoraData();
         if(!INIT_FLAG){
             setSystemSleep();
         }
-    }
 }
 
 /* Main関数 */
@@ -244,6 +238,14 @@ void setup()
 
 void loop()
 {
+    sleep_disable();        //スリープを無効化
+
+    Serial.println("----HELLO----Lora1-----");
+    delay(100);
+    digitalWrite(LED, 1);   //LED on
+    digitalWrite(SLEEP_PIN, LOW);      //Low = active_mode　High = sleep_mode
+    PACKET_FLAG = false;    //packetフラグ初期化
+    setPacketRtcConfig();    //RTCをパケット待ち状態にする
     setReadSendLoraData();
     setSystemSleep();
 }
