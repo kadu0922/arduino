@@ -191,6 +191,19 @@ void setReadSendLoraData(){
     }
 }
 
+void setSystemInit(){
+    digitalWrite(LED, 1);
+    //初回起動はパケットを受け取るまで待機
+    while (INIT_FLAG)
+    {
+        setReadSendLoraData();
+        if(!INIT_FLAG){
+            setSleepRtcConfig();
+            setSystemSleep();
+        }
+    }
+}
+
 /* Main関数 */
 void setup()
 {
@@ -210,19 +223,11 @@ void setup()
     delay(1500);
 
     LoraSerial.readStringUntil(10); //OKの文字列を読み飛ばす
-    digitalWrite(LED, 1);
-    
+
+    setSystemInit();
 }
 
 void loop()
 {
-    //初回起動はパケットを受け取るまで待機
-    while (INIT_FLAG)
-    {
-        setReadSendLoraData();
-        if(!INIT_FLAG){
-            setSleepRtcConfig();
-            setSystemSleep();
-        }
-    }
+
 }
