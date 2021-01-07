@@ -19,6 +19,7 @@
 boolean RTC_FLAG = true; /* true = PACKET時間管理 false = sleep時間管理 */
 boolean PACKET_FLAG = false; /* true = パケットキャプチャ成功　false = パケットキャプチャ失敗 */
 boolean INIT_FLAG = true; /* true = 初回起動　false = 二回目以降*/
+boolean WAIT_FLAG = false; /* true = 待機中　false =待機終了*/
 
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
@@ -161,17 +162,25 @@ void setRestartLora(){
 void setSystemSleep(){
     digitalWrite(LED, 0);                   //LED消灯
     digitalWrite(SLEEP_PIN, HIGH);          //Lora sleep_mode
+    setSleepRtcConfig();                    //RTCをスリープように変更する
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);    //スリープモード設定
     sleep_enable();     //スリープを有効化
     sleep_cpu();        //スリープ開始(ここでプログラムは停止する)
 }
 
-/* Sleepを解除する割り込み関数 */
+/* 割り込み関数 */
 void interrput()
 {
-        Serial.println("Relay1 Lora");
-        PACKET_FLAG = false; //packetフラグ初期化
-        sleep_disable();    //スリープを無効化
+    /* true:パケット待機時間の終了 false:sleep復帰時の処理 */
+    if(RTC_FLAG){ 
+        WAIT_FLAG = false 
+    }else{
+    Serial.println("----HELLO----Lora1-----");
+    digitalWrite(LED, 1);   //LED on
+    PACKET_FLAG = false;    //packetフラグ初期化
+    sleep_disable();        //スリープを無効化
+    setPacketRtcConfig()    //RTCをパケット待ち状態にする
+    }
 }
 
 /* LoraからDataを読み出してデータ部を送る関数*/
@@ -191,6 +200,10 @@ void setReadSendLoraData(){
             if(INIT_FLAG) INIT_FLAG = false;
         }
     }
+    /*パケット待機時間が残ったとき消費する*/
+    while (WAIT_FLAG){
+        delay(10);
+    }
 }
 
 void setSystemInit(){
@@ -200,7 +213,6 @@ void setSystemInit(){
     {
         setReadSendLoraData();
         if(!INIT_FLAG){
-            setSleepRtcConfig();
             setSystemSleep();
         }
     }
@@ -232,5 +244,6 @@ void setup()
 
 void loop()
 {
-    
+    setReadSendLoraData();
+    setSystemSleep();
 }
