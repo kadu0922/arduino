@@ -23,7 +23,12 @@ boolean WAIT_FLAG = false; /* true = 待機中　false =待機終了*/
 
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
-
+void setResetRtc(){
+    Wire.begin(); // arudinoをマスターとして接続
+    delay(1000);  // 発振子の動作待機
+    Wire.write(0x00);                   // データを転送するレジスタ番号を指定
+    Wire.write(0b00100000);                   // 00 Control 1　STOP = 1 動作停止
+}
 /* Sleep用RTCの設定を初期化する関数 */
 void setSleepRtcConfig(){
     RTC_FLAG = false;
@@ -217,6 +222,8 @@ void setup()
 {
     pinMode(SLEEP_PIN,OUTPUT);         //Loraのスリープピン初期化
     digitalWrite(SLEEP_PIN, LOW);      //Low = active_mode　High = sleep_mode
+
+    setResetRtc();
 
     pinMode(LED, OUTPUT);                   //13を出力設定(LED用)
     
