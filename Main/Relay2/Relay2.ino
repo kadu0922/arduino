@@ -190,7 +190,7 @@ void setReadSendLoraData(){
     String Data;
 
     while(!PACKET_FLAG){
-        //delay(10);
+        delay(10);
         if (LoraSerial.read() != -1){
             PACKET_FLAG = true; //キャプチャ成功
             Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
