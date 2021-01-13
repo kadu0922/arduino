@@ -283,7 +283,7 @@ void setup()
     }
     Set_Bootstate(0); //メモリに0を書いておく。
 
-    Serial.print("Lora2\n---------------------------\n");
+    Serial.print("Lora3\n---------------------------\n");
 
     setRestartLora();
     setLoraInit();
