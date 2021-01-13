@@ -1,5 +1,7 @@
 #include <Wire.h>
 #include <avr/sleep.h>
+#include <avr/wdt.h>
+#include <EEPROM.h>
 #include <SoftwareSerial.h>
 
 #define INPIN 2
@@ -22,6 +24,23 @@ boolean INIT_FLAG = true; /* true = 初回起動　false = 二回目以降*/
 boolean WAIT_FLAG = false; /* true = 待機中　false =待機終了*/
 
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
+
+//Arduinoをリセットする
+void software_reset() {
+    wdt_disable();
+    wdt_enable(WDTO_15MS);
+    while (1) {}
+}
+
+byte Load_Bootstate() {
+    int state;
+    state = EEPROM.read(0);
+    return state;
+}
+
+void Set_Bootstate(int state) {
+    EEPROM.write(0, state);
+}
 
 /* rtcの動作停止用 */
 void setResetRtc(){
@@ -255,14 +274,21 @@ void setup()
                                             // message 割り込み時に実行される関数
                                             // FALLING ピンの状態が HIGH → LOW になった時に割り込み
     Serial.begin(9600);                     //siralの速度
+
+    if (Load_Bootstate() == 0) { //メモリに0が書いてあるので再起動する
+        Set_Bootstate(1); //EEPROMに1を書いておく　次は通常起動
+        delay(500);
+        Serial.println("Rebooting");
+        software_reset();
+    }
+    Set_Bootstate(0); //メモリに0を書いておく。
+
     Serial.print("Lora2\n---------------------------\n");
 
     setRestartLora();
     setLoraInit();
     delay(1500);
 
-    LoraSerial.readStringUntil(10); //OKの文字列を読み飛ばす
-    delay(1500);
     LoraSerial.readStringUntil(10); //OKの文字列を読み飛ばす
     LoraSerial.flush();
 
