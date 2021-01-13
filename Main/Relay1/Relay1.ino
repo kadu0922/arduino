@@ -58,7 +58,7 @@ void setSleepRtcConfig(){
     //timerレジスタ
     Wire.write(0x00);       // 0D CLKOUT
     Wire.write(0b10000010); // 0E TimerControl
-    Wire.write(0b00001111); // 0F Timer 15秒設定
+    Wire.write(0b00000101); // 0F Timer 5秒設定
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
@@ -94,7 +94,7 @@ void setPacketRtcConfig(){
     //timerレジスタ
     Wire.write(0x00);       // 0D CLKOUT
     Wire.write(0b10000010); // 0E TimerControl
-    Wire.write(0b00001111); // 0F Timer 15秒設定
+    Wire.write(0b00000111); // 0F Timer 7秒設定
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
@@ -159,7 +159,7 @@ void setRestartLora(){
     digitalWrite(RST_PIN, HIGH); 
     delay(BOOTDELAY);
 
-    Serial.begin(BAUTRATE);
+    
     LoraSerial.begin(BAUTRATE);
 }
 
@@ -189,7 +189,7 @@ void setReadSendLoraData(){
     String Data;
 
     while(!PACKET_FLAG){
-        delay(10);
+        //delay(10);
         if (LoraSerial.read() != -1){
             PACKET_FLAG = true; //キャプチャ成功
             Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
@@ -239,7 +239,7 @@ void setup()
     delay(1500);
 
     LoraSerial.readStringUntil(10); //OKの文字列を読み飛ばす
-
+    LoraSerial.flush();
     setSystemInit();
 }
 
