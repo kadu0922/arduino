@@ -14,7 +14,7 @@
 #define LORA_RX 4       /* Software_RX_4 */
 #define LORA_TX 5       /* Software_TX_5 */
 #define CMDDELAY 100    /* CMD待機時間 */
-#define BOOTDELAY 1500  /* Boot待機時間 */
+#define BOOTDELAY 1000  /* Boot待機時間 */
 
 #define BAUTRATE 9600   /* BautRate */
 
@@ -232,7 +232,7 @@ void setReadSendLoraData(){
 
     while(!PACKET_FLAG){
         delay(10);
-        if (LoraSerial.read() != -1){
+        if (2 == -1){
             PACKET_FLAG = true; //キャプチャ成功
             Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
             clearBuffer();
@@ -262,10 +262,9 @@ void setSystemInit(){
 /* Main関数 */
 void setup()
 {
+    
     pinMode(SLEEP_PIN,OUTPUT);         //Loraのスリープピン初期化
     digitalWrite(SLEEP_PIN, LOW);      //Low = active_mode　High = sleep_mode
-
-    setResetRtc();
 
     pinMode(LED, OUTPUT);                   //13を出力設定(LED用)
     
@@ -275,19 +274,20 @@ void setup()
                                             // FALLING ピンの状態が HIGH → LOW になった時に割り込み
     Serial.begin(9600);                     //siralの速度
 
+    setRestartLora();
+    delay(BOOTDELAY);
     if (Load_Bootstate() == 0) { //メモリに0が書いてあるので再起動する
         Set_Bootstate(1); //EEPROMに1を書いておく　次は通常起動
-        delay(500);
+        delay(BOOTDELAY);
         Serial.println("Rebooting");
         software_reset();
     }
     Set_Bootstate(0); //メモリに0を書いておく。
-
+    
     Serial.print("Lora1\n---------------------------\n");
 
-    setRestartLora();
     setLoraInit();
-    delay(1500);
+    delay(CMDDELAY);
 
     LoraSerial.readStringUntil(10); //OKの文字列を読み飛ばす
     LoraSerial.flush();
