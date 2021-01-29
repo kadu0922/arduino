@@ -71,7 +71,7 @@ void setSleepRtcConfig(){
     //timerレジスタ
     Wire.write(0x00);       // 0D CLKOUT
     Wire.write(0b10000010); // 0E TimerControl
-    Wire.write(0b00000101); // 0F Timer 5秒設定
+    Wire.write(0b00001111); // 0F Timer 15秒設定
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
@@ -107,7 +107,7 @@ void setPacketRtcConfig(){
     //timerレジスタ
     Wire.write(0x00);       // 0D CLKOUT
     Wire.write(0b10000010); // 0E TimerControl
-    Wire.write(0b00000111); // 0F Timer 7秒設定
+    Wire.write(0b000000101); // 0F Timer 5秒設定
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
@@ -117,17 +117,18 @@ void setPacketRtcConfig(){
 
 /* loraの初期化関数 */
 void setLoraInit() {
-    Serial.println("Start...");
+
     // コマンドモード開始
     setLoraConfig("2"); 
+    //channel設定
+    setLoraConfig("channel 1"); 
     //nodeの種別設定
     setLoraConfig("node 2");
     // bw（帯域幅の設定）
-    setLoraConfig("bw 4"); 
+    setLoraConfig("bw 4
+    "); 
     // sf（拡散率の設定）
     setLoraConfig("sf 12"); 
-    //channel設定
-    setLoraConfig("channel 1"); 
     // 自分が参加するPANネットワークアドレスの設定
     setLoraConfig("panid 0002"); 
     // 自分のノードIDを設定
@@ -149,7 +150,7 @@ void setLoraInit() {
     // 通信の開始
     setLoraConfig("z");
     // 送信データの内容
-    Serial.println("Set up OK!");
+    Serial.println("Lora2 Ready\n---------------------------");
 }
 
 /* loraにConfigを送る関数 */
@@ -191,7 +192,7 @@ void setSystemSleep(){
 void interrput()
 {
     if(RTC_FLAG){ 
-        Serial.println("----WAIT----Lora2-----");
+        Serial.println("----TimeOut-----");
         WAIT_FLAG = true;
     }
 }
@@ -199,14 +200,13 @@ void interrput()
 /* LoraからDataを読み出してデータ部を送る関数*/
 void setReadSendLoraData(){
     String Data;
-
     while(!PACKET_FLAG){
         delay(10);
         if (LoraSerial.read() != -1){
             PACKET_FLAG = true; //キャプチャ成功
             Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
             clearBuffer();
-            Data = Data.substring(8);
+            Data = Data.substring(3);
             Serial.println(Data); //データ部分だけ表示シリアルモニターで表示
             LoraSerial.println(Data);  //Loraで送信する
             LoraSerial.flush();
@@ -248,12 +248,11 @@ void setup()
     if (Load_Bootstate() == 0) { //メモリに0が書いてあるので再起動する
         Set_Bootstate(1); //EEPROMに1を書いておく　次は通常起動
         delay(BOOTDELAY);
-        Serial.println("Rebooting");
         software_reset();
     }
     Set_Bootstate(0); //メモリに0を書いておく。
 
-    Serial.print("Lora2\n---------------------------\n");
+
 
     setLoraInit();
     delay(CMDDELAY);

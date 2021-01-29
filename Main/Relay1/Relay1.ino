@@ -71,7 +71,7 @@ void setSleepRtcConfig(){
     //timerレジスタ
     Wire.write(0x00);       // 0D CLKOUT
     Wire.write(0b10000010); // 0E TimerControl
-    Wire.write(0b00001010); // 0F Timer 10秒設定
+    Wire.write(0b00001111); // 0F Timer 15秒設定
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
@@ -107,7 +107,7 @@ void setPacketRtcConfig(){
     //timerレジスタ
     Wire.write(0x00);       // 0D CLKOUT
     Wire.write(0b10000010); // 0E TimerControl
-    Wire.write(0b00000111); // 0F Timer 7秒設定
+    Wire.write(0b000000101); // 0F Timer 5秒設定
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
@@ -117,6 +117,7 @@ void setPacketRtcConfig(){
 
 /* loraの初期化関数 */
 void setLoraInit() {
+    
     // コマンドモード開始
     setLoraConfig("2"); 
     //channel設定
@@ -124,7 +125,7 @@ void setLoraInit() {
     //nodeの種別設定
     setLoraConfig("node 2");
     // bw（帯域幅の設定）
-    setLoraConfig("bw 2"); 
+    setLoraConfig("bw 4"); 
     // sf（拡散率の設定）
     setLoraConfig("sf 12"); 
     // 自分が参加するPANネットワークアドレスの設定
@@ -198,13 +199,19 @@ void interrput()
 /* LoraからDataを読み出してデータ部を送る関数*/
 void setReadSendLoraData(){
     String Data;
+    String List[5] = {"\0"}; // 分割された文字列を格納する配列 
     while(!PACKET_FLAG){
         delay(10);
         if (LoraSerial.read() != -1){
             PACKET_FLAG = true; //キャプチャ成功
             Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
             clearBuffer();
-            Data = Data.substring(3);
+            Data = Data.substring(11);
+            int index = split(Data, '&', List);
+            for(int i = 0; i < index; i++){
+                Serial.println(List[i]);
+            }
+
             Serial.println(Data); //データ部分だけ表示シリアルモニターで表示
             LoraSerial.println(Data);  //Loraで送信する
             LoraSerial.flush();
@@ -273,4 +280,19 @@ void loop()
     setPacketRtcConfig();    //RTCをパケット待ち状態にする
     setReadSendLoraData();
     setSystemSleep();
+}
+
+int split(String data, char delimiter, String *dst){
+    int index = 0;
+    int arraySize = (sizeof(data)/sizeof((data)[0]));  
+    int datalength = data.length();
+    for (int i = 0; i < datalength; i++) {
+        char tmp = data.charAt(i);
+        if ( tmp == delimiter ) {
+            index++;
+            if ( index > (arraySize - 1)) return -1;
+        }
+        else dst[index] += tmp;
+    }
+    return (index + 1);
 }
