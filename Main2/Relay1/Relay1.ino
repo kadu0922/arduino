@@ -117,10 +117,10 @@ void setPacketRtcConfig(){
 
 /* loraの初期化関数 */
 void setLoraInit() {
-
+    
     // コマンドモード開始
     setLoraConfig("2"); 
-        //channel設定
+    //channel設定
     setLoraConfig("channel 1"); 
     //nodeの種別設定
     setLoraConfig("node 2");
@@ -131,9 +131,9 @@ void setLoraInit() {
     // 自分が参加するPANネットワークアドレスの設定
     setLoraConfig("panid 0002"); 
     // 自分のノードIDを設定
-    setLoraConfig("ownid 0003"); 
+    setLoraConfig("ownid 0001"); 
     //送信元ノードネットワークアドレス
-    setLoraConfig("dstid 0004"); 
+    setLoraConfig("dstid 0002"); 
     // ack受信の設定
     setLoraConfig("ack 2"); 
     // 転送モード設定
@@ -149,7 +149,7 @@ void setLoraInit() {
     // 通信の開始
     setLoraConfig("z");
     // 送信データの内容
-    Serial.println("Lora3 Ready\n---------------------------");
+    Serial.println("Lora1 Ready\n---------------------------");
 }
 
 /* loraにConfigを送る関数 */
@@ -177,7 +177,7 @@ void setRestartLora(){
 
 /* Arduino,Loraをスリープさせる関数 */
 void setSystemSleep(){
-    Serial.println("----SLLEP----Lora3-----");
+    Serial.println("----SLLEP----Lora1-----");
     WAIT_FLAG = false;
     digitalWrite(LED, 0);                   //LED消灯
     digitalWrite(SLEEP_PIN, HIGH);          //Lora sleep_mode
@@ -207,7 +207,7 @@ void setReadSendLoraData(){
             Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
             clearBuffer();
             Data = Data.substring(3);
-            
+
             int index = split(Data, '&', List);
             for(int i = 0; i < index; i++){
                 Serial.println(List[i]);
@@ -257,6 +257,7 @@ void setup()
         software_reset();
     }
     Set_Bootstate(0); //メモリに0を書いておく。
+    
 
 
     setLoraInit();
@@ -272,7 +273,7 @@ void loop()
 {
     sleep_disable();        //スリープを無効化
 
-    Serial.println("----HELLO----Lora3-----");
+    Serial.println("----HELLO----Lora1-----");
     delay(100);
     digitalWrite(LED, 1);   //LED on
     digitalWrite(SLEEP_PIN, LOW);      //Low = active_mode　High = sleep_mode

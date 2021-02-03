@@ -107,7 +107,7 @@ void setPacketRtcConfig(){
     //timerレジスタ
     Wire.write(0x00);       // 0D CLKOUT
     Wire.write(0b10000010); // 0E TimerControl
-    Wire.write(0b000000101); // 0F Timer 5秒設定
+    Wire.write(0b00000011); // 0F タイムアウト時間3秒
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
@@ -206,7 +206,8 @@ void setReadSendLoraData(){
             PACKET_FLAG = true; //キャプチャ成功
             Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
             clearBuffer();
-            Data = Data.substring(11);
+            Data = Data.substring(3);
+
             int index = split(Data, '&', List);
             for(int i = 0; i < index; i++){
                 Serial.println(List[i]);
