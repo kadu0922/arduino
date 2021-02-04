@@ -18,10 +18,11 @@
 
 #define BAUTRATE 9600   /* BautRate */
 
-boolean RTC_FLAG = true; /* true = PACKET時間管理 false = sleep時間管理 */
-boolean PACKET_FLAG = false; /* true = パケットキャプチャ成功　false = パケットキャプチャ失敗 */
-boolean INIT_FLAG = true; /* true = 初回起動　false = 二回目以降*/
-boolean WAIT_FLAG = false; /* true = 待機中　false =待機終了*/
+boolean RTC_FLAG = false;          /* true = PACKET時間管理 false = sleep時間管理 */
+boolean TIMEOUT_FLAG = false;     /* true = タイムアウトした false = タイムアウトしてない */
+boolean PACKET_FLAG = false;      /* true = パケットキャプチャ成功　false = パケットキャプチャ失敗 */
+boolean SLEEP_FLAG = false;        /*true = 分を計測　false = 秒を計測*/
+boolean WAIT_FLAG = false;        /* true = 待機中　false =待機終了*/
 
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
@@ -42,9 +43,10 @@ void Set_Bootstate(int state) {
     EEPROM.write(0, state);
 }
 
-/* Sleep用RTCの設定を初期化する関数 */
+/* RTCが分計測するためのSleep用関数 */
 void setSleepRtcConfig(){
     RTC_FLAG = false;
+    SLEEP_FLAG = true; 
 
     Wire.begin(); // arudinoをマスターとして接続
     delay(1000);  // 発振子の動作待機
@@ -70,8 +72,8 @@ void setSleepRtcConfig(){
 
     //timerレジスタ
     Wire.write(0x00);       // 0D CLKOUT
-    Wire.write(0b10000010); // 0E TimerControl
-    Wire.write(0b00001111); // 0F Timer 15秒設定
+    Wire.write(0b10000011); // 0E TimerControl
+    Wire.write(0b00001111); // 0F Timer 14分設定
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
@@ -79,11 +81,11 @@ void setSleepRtcConfig(){
     Wire.endTransmission();
 }
 
+/* RTCがタイムアウト時間を計測するための関数 */
 void setPacketRtcConfig(){
     RTC_FLAG = true;
 
     Wire.begin(); // arudinoをマスターとして接続
-    delay(1000);  // 発振子の動作待機
 
     Wire.beginTransmission(RTCaddress); //接続するIC2のモジュールを選択
     Wire.write(0x00);                   // データを転送するレジスタ番号を指定
@@ -107,7 +109,81 @@ void setPacketRtcConfig(){
     //timerレジスタ
     Wire.write(0x00);       // 0D CLKOUT
     Wire.write(0b10000010); // 0E TimerControl
-    Wire.write(0b000000101); // 0F Timer 5秒設定
+    Wire.write(0b000001000); // 0F Timer 8秒設定
+
+    // Control 設定
+    Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
+    Wire.write(0b00000001); //Control 2 Ti/Tp = 0 TIE = 1
+    Wire.endTransmission();
+}
+
+/* RTCが秒を計測するためのSleep用関数 */
+void setRtcTrue(){
+    RTC_FLAG = false;
+    SLEEP_FLAG = false;
+
+    Wire.begin(); // arudinoをマスターとして接続
+
+    Wire.beginTransmission(RTCaddress); //接続するIC2のモジュールを選択
+    Wire.write(0x00);                   // データを転送するレジスタ番号を指定
+    Wire.write(0b00100000);                   // 00 Control 1　STOP = 1 動作停止
+    Wire.write(0x00);                         // 01 Control 2 
+    Wire.write(0b00000001);                   // 02 Seconds　
+    Wire.write(0b00000000);                   // 03 Minutes
+    Wire.write(0b00000000);                   // 04 Hours
+    Wire.write(0b00000001);                   // 05 Days
+    Wire.write(0b00000001);                   // 06 Weekdays
+    Wire.write(0b00000001);                   // 07 Months
+    Wire.write(0b00100000);                   // 08 Years
+    //20年1月１日00:00に設定
+
+    //Alram レジスタ
+    Wire.write(0x00);       // 09 Minutes Alarm　
+    Wire.write(0x00);       // 0A Hours Alarm
+    Wire.write(0x00);       // 0B Days Alarm
+    Wire.write(0x00);       // 0C Weekdays Alarm
+
+    //timerレジスタ
+    Wire.write(0x00);       // 0D CLKOUT
+    Wire.write(0b10000010); // 0E TimerControl
+    Wire.write(0b00111001); // 0F Timer 57秒設定
+
+    // Control 設定
+    Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
+    Wire.write(0b00000001); //Control 2 Ti/Tp = 0 TIE = 1
+    Wire.endTransmission();
+}
+
+/* RTCがタイムアウトしたときの秒を計測するためのSleep用関数 */
+void setRtcFalse(){
+    RTC_FLAG = false;
+    SLEEP_FLAG = false;
+
+    Wire.begin(); // arudinoをマスターとして接続
+
+    Wire.beginTransmission(RTCaddress); //接続するIC2のモジュールを選択
+    Wire.write(0x00);                   // データを転送するレジスタ番号を指定
+    Wire.write(0b00100000);                   // 00 Control 1　STOP = 1 動作停止
+    Wire.write(0x00);                         // 01 Control 2 
+    Wire.write(0b00000001);                   // 02 Seconds　
+    Wire.write(0b00000000);                   // 03 Minutes
+    Wire.write(0b00000000);                   // 04 Hours
+    Wire.write(0b00000001);                   // 05 Days
+    Wire.write(0b00000001);                   // 06 Weekdays
+    Wire.write(0b00000001);                   // 07 Months
+    Wire.write(0b00100000);                   // 08 Years
+    //20年1月１日00:00に設定
+
+    //Alram レジスタ
+    Wire.write(0x00);       // 09 Minutes Alarm　
+    Wire.write(0x00);       // 0A Hours Alarm
+    Wire.write(0x00);       // 0B Days Alarm
+    Wire.write(0x00);       // 0C Weekdays Alarm
+
+    //timerレジスタ
+    Wire.write(0x00);       // 0D CLKOUT
+    Wire.write(0b10000010); // 0E TimerControl
+    Wire.write(0b00110110); // 0F Timer 54秒設定
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
@@ -193,12 +269,21 @@ void interrput()
     if(RTC_FLAG){ 
         Serial.println("----TimeOut-----");
         WAIT_FLAG = true;
+        TIMEOUT_FLAG = true;
+    }else{
+        if(!SLEEP_FLAG){
+            if(TIMEOUT_FLAG)    
+                setRtcTrue();
+            else
+                setRtcFalse();
+        }
     }
 }
 
 /* LoraからDataを読み出してデータ部を送る関数*/
 void setReadSendLoraData(){
     String Data;
+    TIMEOUT_FLAG = false;
     String List[5] = {"\0"}; // 分割された文字列を格納する配列 
     while(!PACKET_FLAG){
         delay(10);
@@ -216,8 +301,7 @@ void setReadSendLoraData(){
             Serial.println(Data); //データ部分だけ表示シリアルモニターで表示
             LoraSerial.println(Data);  //Loraで送信する
             LoraSerial.flush();
-            /* 初回起動時はINIT_FLAGをfalseにする*/
-            if(INIT_FLAG) INIT_FLAG = false;
+
         }
         /*パケット待機時間が終了したとき抜ける*/
         if(WAIT_FLAG) break;
@@ -229,10 +313,8 @@ void setSystemInit(){
     digitalWrite(LED, 1);
     //初回起動はパケットを受け取るまで待機
 
-        setReadSendLoraData();
-        if(!INIT_FLAG){
-            setSystemSleep();
-        }
+    setReadSendLoraData();
+    setSystemSleep();
 }
 
 /* Main関数 */
