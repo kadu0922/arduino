@@ -64,10 +64,9 @@ void loop()
   sleep_disable();        //スリープを無効化
 
   Serial.println("----HELLO----Lora4-----");
-  delay(100);
+  delay(10);
   digitalWrite(LED, 1);   //LED on
   digitalWrite(SLEEP_PIN, LOW);      //Low = active_mode　High = sleep_mode
-  PACKET_FLAG = false;    //packetフラグ初期化
   setPacketRtc();    //RTCをパケット待ち状態にする
   setReadSendData();
   setSystemSleep();
@@ -380,7 +379,8 @@ void setReadSendData() {
     /*パケット待機時間が終了したとき抜ける*/
     if (TIMEOUT) break;
   }
-
+ PACKET_FLAG = false;        //packetフラグ初期化
+ 
 }
 
 int split(String data, char delimiter, String *dst) {
