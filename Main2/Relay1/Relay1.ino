@@ -28,7 +28,7 @@ SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 /* Main関数 */
 void setup()
 {
-  pinMode(SLEEP_PIN,OUTPUT);              //Loraのスリープピン初期化
+  pinMode(SLEEP_PIN, OUTPUT);             //Loraのスリープピン初期化
   digitalWrite(SLEEP_PIN, LOW);           //Low = active_mode　High = sleep_mode
   Serial.begin(BAUTRATE);                 //siralの速度
   pinMode(LED, OUTPUT);                   //13を出力設定(LED用)
@@ -56,7 +56,6 @@ void setup()
   //初回起動はパケットを受け取るまで待機
 
   setReadSendData();
-  TIMEOUT = true;
   setSystemSleep();
 }
 
@@ -117,7 +116,7 @@ void setResetRtc() {
 }
 
 /* RTCが分計測するためのSleep用関数 */
-void setSleepRtc(){
+void setSleepRtc() {
   RTC_FLAG = false;
   SLEEP_FLAG = true;
 
@@ -143,8 +142,8 @@ void setSleepRtc(){
 
   //timerレジスタ
   Wire.write(0x00);       // 0D CLKOUT
-    Wire.write(0b10000011); // 0E TimerControl
-    Wire.write(0b00001110); // 0F Timer 14分設定
+  Wire.write(0b10000011); // 0E TimerControl
+  Wire.write(0b00001110); // 0F Timer 14分設定
 
   // Control 設定
   Wire.write(0x00);       // 00 Control 1　0動作開始
@@ -153,7 +152,7 @@ void setSleepRtc(){
 }
 
 /* RTCがタイムアウト時間を計測するための関数 */
-void setPacketRtc(){
+void setPacketRtc() {
   RTC_FLAG = true;
 
   Wire.begin(); // arudinoをマスターとして接続
@@ -188,8 +187,8 @@ void setPacketRtc(){
   Wire.endTransmission();
 }
 
-/* RTCが秒を計測するためのSleep用関数 */
-void setRtcTrue(){
+/* RTCが秒をタイムアウト時の秒を計測するためのSleep用関数 */
+void setRtcTrue() {
   RTC_FLAG = false;
   SLEEP_FLAG = false;
 
@@ -225,8 +224,8 @@ void setRtcTrue(){
   Wire.endTransmission();
 }
 
-/* RTCがタイムアウトしたときの秒を計測するためのSleep用関数 */
-void setRtcFalse(){
+/* RTCが正常動作時の秒を計測するためのSleep用関数 */
+void setRtcFalse() {
   RTC_FLAG = false;
   SLEEP_FLAG = false;
 
@@ -300,7 +299,7 @@ void setLoraInit() {
 }
 
 /* loraにConfigを送る関数 */
-void setLoraConfig(String Config){
+void setLoraConfig(String Config) {
   LoraSerial.println(Config);
   clearBuffer();
 }
@@ -312,7 +311,7 @@ void clearBuffer() {
 }
 
 /* Loraを再起動させる関数 */
-void setRestartLora(){
+void setRestartLora() {
   pinMode(RST_PIN, OUTPUT);
   digitalWrite(RST_PIN, LOW);
   delay(BOOTDELAY);
@@ -323,7 +322,7 @@ void setRestartLora(){
 }
 
 /* Arduino,Loraをスリープさせる関数 */
-void setSystemSleep(){
+void setSystemSleep() {
   Serial.println("----SLEEP----Lora1-----");
   Serial.flush();
   digitalWrite(LED, 0);                   //LED消灯
@@ -334,7 +333,7 @@ void setSystemSleep(){
   sleep_cpu();        //スリープ開始(ここでプログラムは停止する)
 
   sleep_disable();        //スリープを無効化
-  if (TIMEOUT) {
+  if (!TIMEOUT) {
     Serial.println("----True Sleep sec-----");
     setRtcFalse();
   } else {
@@ -350,7 +349,7 @@ void setSystemSleep(){
 /* 割り込み関数 */
 void interrput()
 {
-  if(RTC_FLAG){
+  if (RTC_FLAG) {
     Serial.println("----TimeOut-----");
     TIMEOUT = true;
   }
@@ -358,19 +357,19 @@ void interrput()
 }
 
 /* LoraからDataを読み出してデータ部を送る関数*/
-void setReadSendData(){
+void setReadSendData() {
   String Data;
   String List[5] = {"\0"}; // 分割された文字列を格納する配列
-  while (!PACKET_FLAG){
+  while (!PACKET_FLAG) {
     delay(10);
-    if (LoraSerial.read() != -1){
+    if (LoraSerial.read() != -1) {
       PACKET_FLAG = true; //キャプチャ成功
       Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
       clearBuffer();
       Data = Data.substring(3);
 
       int index = split(Data, '&', List);
-      for(int i = 0; i < index; i++){
+      for (int i = 0; i < index; i++) {
         Serial.println(List[i]);
       }
 
@@ -379,14 +378,14 @@ void setReadSendData(){
       LoraSerial.flush();
     }
     /*パケット待機時間が終了したとき抜ける*/
-    if(TIMEOUT) break;
+    if (TIMEOUT) break;
   }
 
 }
 
-int split(String data, char delimiter, String *dst){
+int split(String data, char delimiter, String *dst) {
   int index = 0;
-  int arraySize = (sizeof(data)/sizeof((data)[0]));
+  int arraySize = (sizeof(data) / sizeof((data)[0]));
   int datalength = data.length();
   for (int i = 0; i < datalength; i++) {
     char tmp = data.charAt(i);
