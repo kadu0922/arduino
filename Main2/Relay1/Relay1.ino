@@ -242,7 +242,7 @@ void setRtcFalse() {
   //timerレジスタ
   Wire.write(0x00);       // 0D CLKOUT
   Wire.write(0b10000010); // 0E TimerControl
-  Wire.write(0b01010010); // 0F Timer 54秒設定
+  Wire.write(0b00110100); // 0F Timer 52秒設定
 
   // Control 設定
   Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
@@ -274,7 +274,7 @@ void setLoraInit() {
   // 転送モード設定
   setLoraConfig("n 1");
   // RRSIの付与設定
-  setLoraConfig("p 1");
+  setLoraConfig("p 2");
   // sleepの設定
   setLoraConfig("sleep 3");
   // UART転送速度設定
@@ -283,7 +283,7 @@ void setLoraInit() {
   setLoraConfig("w");
   // 通信の開始
   setLoraConfig("z");
-  // 送信データの内容
+
 }
 
 /* LoRaにConfigを送る関数 */
