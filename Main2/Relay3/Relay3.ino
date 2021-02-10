@@ -37,7 +37,7 @@ void setup()
     delay(BOOTDELAY);
     setSystemReset();
   }
-  Set_Bootstate(0); //メモリに0を記述
+  setBoot(0); //メモリに0を記述
 
   setLoraInit();
   delay(CMDDELAY);
@@ -283,7 +283,7 @@ void setLoraInit() {
     setLoraConfig("w");
     // 通信の開始
     setLoraConfig("z");
-    
+
 }
 
 /* LoRaにConfigを送る関数 */
