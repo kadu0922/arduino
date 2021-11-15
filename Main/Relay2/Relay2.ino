@@ -234,7 +234,7 @@ void setup()
                                             // message 割り込み時に実行される関数
                                             // FALLING ピンの状態が HIGH → LOW になった時に割り込み
     Serial.begin(9600);                     //siralの速度
-    Serial.print("Lora1\n---------------------------\n");
+    Serial.print("Lora2\n---------------------------\n");
 
     setRestartLora();
     setLoraInit();
@@ -249,7 +249,7 @@ void loop()
 {
     sleep_disable();        //スリープを無効化
 
-    Serial.println("----HELLO----Lora1-----");
+    Serial.println("----HELLO----Lora2-----");
     delay(100);
     digitalWrite(LED, 1);   //LED on
     digitalWrite(SLEEP_PIN, LOW);      //Low = active_mode　High = sleep_mode
