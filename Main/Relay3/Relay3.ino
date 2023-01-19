@@ -1,5 +1,7 @@
 #include <Wire.h>
 #include <avr/sleep.h>
+#include <avr/wdt.h>
+#include <EEPROM.h>
 #include <SoftwareSerial.h>
 
 #define INPIN 2
@@ -23,12 +25,51 @@ boolean WAIT_FLAG = false; /* true = 待機中　false =待機終了*/
 
 SoftwareSerial LoraSerial(LORA_RX, LORA_TX);
 
+//Arduinoをリセットする
+void software_reset() {
+    wdt_disable();
+    wdt_enable(WDTO_15MS);
+    while (1) {}
+}
+
+byte Load_Bootstate() {
+    int state;
+    state = EEPROM.read(0);
+    return state;
+}
+
+void Set_Bootstate(int state) {
+    EEPROM.write(0, state);
+}
+
 /* rtcの動作停止用 */
 void setResetRtc(){
     Wire.begin(); // arudinoをマスターとして接続
     delay(1000);  // 発振子の動作待機
+    
+    Wire.beginTransmission(RTCaddress); //接続するIC2のモジュールを選択
     Wire.write(0x00);                   // データを転送するレジスタ番号を指定
     Wire.write(0b00100000);                   // 00 Control 1　STOP = 1 動作停止
+    Wire.write(0x00);                         // 01 Control 2 
+    Wire.write(0x00);                         // 02 Seconds　
+    Wire.write(0x00);                   // 03 Minutes
+    Wire.write(0x00);                   // 04 Hours
+    Wire.write(0x00);                   // 05 Days
+    Wire.write(0x00);                   // 06 Weekdays
+    Wire.write(0x00);                   // 07 Months
+    Wire.write(0x00);                   // 08 Years
+    //20年1月１日00:00に設定
+
+    //Alram レジスタ
+    Wire.write(0x00);       // 09 Minutes Alarm　
+    Wire.write(0x00);       // 0A Hours Alarm
+    Wire.write(0x00);       // 0B Days Alarm
+    Wire.write(0x00);       // 0C Weekdays Alarm
+
+    //timerレジスタ
+    Wire.write(0x00);       // 0D CLKOUT
+    Wire.write(0x00);       // 0E TimerControl
+    Wire.write(0x00);       // 0F Timer 7秒設定
 }
 
 /* Sleep用RTCの設定を初期化する関数 */
@@ -60,7 +101,7 @@ void setSleepRtcConfig(){
     //timerレジスタ
     Wire.write(0x00);       // 0D CLKOUT
     Wire.write(0b10000010); // 0E TimerControl
-    Wire.write(0b00001111); // 0F Timer 15秒設定
+    Wire.write(0b00000101); // 0F Timer 5秒設定
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
@@ -96,7 +137,7 @@ void setPacketRtcConfig(){
     //timerレジスタ
     Wire.write(0x00);       // 0D CLKOUT
     Wire.write(0b10000010); // 0E TimerControl
-    Wire.write(0b00001111); // 0F Timer 15秒設定
+    Wire.write(0b00000111); // 0F Timer 7秒設定
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
@@ -161,13 +202,12 @@ void setRestartLora(){
     digitalWrite(RST_PIN, HIGH); 
     delay(BOOTDELAY);
 
-    Serial.begin(BAUTRATE);
     LoraSerial.begin(BAUTRATE);
 }
 
 /* Arduino,Loraをスリープさせる関数 */
 void setSystemSleep(){
-    Serial.println("----SLLEP----Lora3-----");
+    Serial.println("----SLLEP----Lora1-----");
     WAIT_FLAG = false;
     digitalWrite(LED, 0);                   //LED消灯
     digitalWrite(SLEEP_PIN, HIGH);          //Lora sleep_mode
@@ -181,7 +221,7 @@ void setSystemSleep(){
 void interrput()
 {
     if(RTC_FLAG){ 
-        Serial.println("----WAIT----Lora3-----");
+        Serial.println("----WAIT----Lora1-----");
         WAIT_FLAG = true;
     }
 }
@@ -196,7 +236,7 @@ void setReadSendLoraData(){
             PACKET_FLAG = true; //キャプチャ成功
             Data = LoraSerial.readStringUntil('\r');//ラインフィードまで格納する
             clearBuffer();
-            Data = Data.substring(11);
+            Data = Data.substring(8);
             Serial.println(Data); //データ部分だけ表示シリアルモニターで表示
             LoraSerial.println(Data);  //Loraで送信する
             LoraSerial.flush();
@@ -234,13 +274,23 @@ void setup()
                                             // message 割り込み時に実行される関数
                                             // FALLING ピンの状態が HIGH → LOW になった時に割り込み
     Serial.begin(9600);                     //siralの速度
-    Serial.print("Lora1\n---------------------------\n");
+
+    if (Load_Bootstate() == 0) { //メモリに0が書いてあるので再起動する
+        Set_Bootstate(1); //EEPROMに1を書いておく　次は通常起動
+        delay(500);
+        Serial.println("Rebooting");
+        software_reset();
+    }
+    Set_Bootstate(0); //メモリに0を書いておく。
+
+    Serial.print("Lora3\n---------------------------\n");
 
     setRestartLora();
     setLoraInit();
     delay(1500);
 
     LoraSerial.readStringUntil(10); //OKの文字列を読み飛ばす
+    LoraSerial.flush();
 
     setSystemInit();
 }
@@ -258,4 +308,3 @@ void loop()
     setReadSendLoraData();
     setSystemSleep();
 }
-

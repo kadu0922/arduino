@@ -48,7 +48,7 @@ void setRtcConfig(){
     //timerレジスタ
     Wire.write(0x00);       // 0D CLKOUT
     Wire.write(0b10000010); // 0E TimerControl
-    Wire.write(0b00000011); // 0F Timer 3秒設定
+    Wire.write(0b00000110); // 0F Timer 6秒設定
 
     // Control 設定
     Wire.write(0x00);       // 00 Control 1　STOP = 0 動作開始
